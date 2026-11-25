@@ -58,7 +58,7 @@ export default async function SiteLayout({
         </main>
         <SiteFooter settings={settings} />
         <WhatsappChat settings={settings} />
-        <AnnouncementCallout item={announcements.items[0] ?? null} />
+        <AnnouncementCallout items={announcements.items} />
         <NewsletterPopup />
         <CartDrawer />
       </CartProvider>

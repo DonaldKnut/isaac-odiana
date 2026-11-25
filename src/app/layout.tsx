@@ -20,6 +20,9 @@ const body = Figtree({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL ?? "https://isaacodiana.com",
+  ),
   title: {
     default: "Isaac Odiana",
     template: "%s · Isaac Odiana",
@@ -28,6 +31,21 @@ export const metadata: Metadata = {
     "Official home of Isaac Odiana — music, beats, jazz, books, podcasts, merchandise and tutoring.",
   applicationName: "Isaac Odiana Studio",
   manifest: "/manifest.webmanifest",
+  openGraph: {
+    type: "website",
+    siteName: "Isaac Odiana Studio",
+    title: "Isaac Odiana",
+    description:
+      "Official home of Isaac Odiana — music, beats, jazz, books, podcasts, merchandise and tutoring.",
+    images: [{ url: brandMonogram, alt: "Isaac Odiana" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Isaac Odiana",
+    description:
+      "Official home of Isaac Odiana — music, beats, jazz, books, podcasts, merchandise and tutoring.",
+    images: [brandMonogram],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",

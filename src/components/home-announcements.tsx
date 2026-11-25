@@ -1,12 +1,16 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { AnimatePresence, motion } from "framer-motion";
 import { Megaphone } from "lucide-react";
 import { HomeAnnouncementCard } from "@/components/announcement-cards";
 import { Reveal } from "@/components/reveal";
 import { useLocale } from "@/components/locale-provider";
 import { useLocalized } from "@/components/localized";
 import type { AnnouncementsBundle } from "@/lib/cms/types";
+
+const HOME_SEEN_KEY = "isaac-home-announcement-index";
 
 export function HomeAnnouncements({
   content,
@@ -15,9 +19,30 @@ export function HomeAnnouncements({
 }) {
   const t = useLocalized();
   const { t: ui } = useLocale();
-  const items = content.items.slice(0, 3);
+  const items = content.items;
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    if (items.length <= 1) return;
+    const raw = localStorage.getItem(HOME_SEEN_KEY);
+    const stored = raw ? Number(raw) : 0;
+    const start =
+      Number.isFinite(stored) && stored >= 0 ? stored % items.length : 0;
+    setIndex(start);
+  }, [items.length]);
 
   if (items.length === 0) return null;
+
+  const current = items[Math.min(index, items.length - 1)]!;
+
+  function showNext() {
+    if (items.length <= 1) return;
+    setIndex((value) => {
+      const next = (value + 1) % items.length;
+      localStorage.setItem(HOME_SEEN_KEY, String(next));
+      return next;
+    });
+  }
 
   return (
     <section className="border-t border-line bg-ink-soft/25">
@@ -35,20 +60,37 @@ export function HomeAnnouncements({
               {t(content.body)}
             </p>
           </div>
-          <Link
-            href="/announcements"
-            className="text-[0.65rem] uppercase tracking-[0.18em] text-amber-bright transition hover:text-parchment"
-          >
-            {ui.pages.announcements.viewAll}
-          </Link>
+          <div className="flex flex-wrap items-center gap-3">
+            {items.length > 1 ? (
+              <button
+                type="button"
+                onClick={showNext}
+                className="cursor-pointer text-[0.65rem] uppercase tracking-[0.18em] text-sand transition hover:text-amber-bright"
+              >
+                Next · {index + 1}/{items.length}
+              </button>
+            ) : null}
+            <Link
+              href="/announcements"
+              className="text-[0.65rem] uppercase tracking-[0.18em] text-amber-bright transition hover:text-parchment"
+            >
+              {ui.pages.announcements.viewAll}
+            </Link>
+          </div>
         </Reveal>
 
-        <div className="mt-10 grid gap-5 md:grid-cols-3">
-          {items.map((item, index) => (
-            <Reveal key={item.id} delay={index * 0.06}>
-              <HomeAnnouncementCard item={item} />
-            </Reveal>
-          ))}
+        <div className="mt-10 max-w-xl">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={current.id}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <HomeAnnouncementCard item={current} />
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
     </section>

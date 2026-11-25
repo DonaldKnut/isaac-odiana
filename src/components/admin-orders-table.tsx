@@ -1,7 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { ChevronDown, Mail, UserRound } from "lucide-react";
+import {
+  markOrderFulfilled,
+  type OrderActionState,
+} from "@/app/actions/admin-orders";
+import { useToast } from "@/components/toast-provider";
 import { formatMoney } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
@@ -15,6 +20,59 @@ export type AdminOrderRow = {
   createdAt: string;
   items: Array<{ title: string; quantity: number; unitCents: number }>;
 };
+
+const initial: OrderActionState = { ok: false, message: "" };
+
+function FulfilForm({ orderId, status }: { orderId: string; status: string }) {
+  const toast = useToast();
+  const [state, action, pending] = useActionState(markOrderFulfilled, initial);
+
+  useEffect(() => {
+    if (!state.message) return;
+    if (state.ok) toast.success("Orders", state.message);
+    else toast.error("Orders", state.message);
+  }, [state, toast]);
+
+  if (status === "FULFILLED") {
+    return (
+      <p className="text-xs uppercase tracking-[0.16em] text-amber-bright">
+        Fulfilled · customer notified
+      </p>
+    );
+  }
+
+  if (status !== "PAID") {
+    return (
+      <p className="text-xs text-smoke">
+        Fulfilment unlocks after Stripe marks the order PAID.
+      </p>
+    );
+  }
+
+  return (
+    <form action={action} className="space-y-3 border border-line/80 bg-ink/50 p-4">
+      <input type="hidden" name="orderId" value={orderId} />
+      <label className="block space-y-1.5">
+        <span className="text-[0.6rem] uppercase tracking-[0.16em] text-smoke">
+          Fulfilment note (optional)
+        </span>
+        <textarea
+          name="note"
+          rows={2}
+          placeholder="Tracking number, digital download note…"
+          className="w-full border border-line bg-ink px-3 py-2 text-sm text-parchment outline-none focus:border-amber/50"
+        />
+      </label>
+      <button
+        type="submit"
+        disabled={pending}
+        className="inline-flex h-9 cursor-pointer items-center border border-amber/40 bg-amber/10 px-3 text-[0.65rem] uppercase tracking-[0.16em] text-amber-bright transition hover:bg-amber/20 disabled:opacity-50"
+      >
+        {pending ? "Updating…" : "Mark fulfilled + email guest"}
+      </button>
+    </form>
+  );
+}
 
 export function AdminOrdersTable({ orders }: { orders: AdminOrderRow[] }) {
   const [openId, setOpenId] = useState<string | null>(orders[0]?.id ?? null);
@@ -120,10 +178,7 @@ export function AdminOrdersTable({ orders }: { orders: AdminOrderRow[] }) {
                     ))}
                   </ul>
 
-                  <p className="text-xs leading-relaxed text-smoke">
-                    No customer account required — fulfil using this email
-                    {order.shippingName ? ` and name (${order.shippingName})` : ""}.
-                  </p>
+                  <FulfilForm orderId={order.id} status={order.status} />
                 </div>
               </div>
             </div>

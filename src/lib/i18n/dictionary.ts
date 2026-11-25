@@ -25,6 +25,26 @@ const en = {
   enter: "Enter",
   close: "Close",
   keepBrowsing: "Keep browsing",
+  openFullPage: "Open full page",
+  roomAims: {
+    "/music":
+      "Music is the centre of Isaac’s public craft — releases, gallery stills and the trail between them. This room is where listeners meet the work before stepping into a full listening session.",
+    "/books":
+      "The bookstore holds physical editions and digital reads from the studio desk. It exists so the writing lives beside the sound — a slower, collectible layer of the same practice.",
+    "/podcast":
+      "The podcast archive is where process gets spoken aloud: jazz phrasing, beat architecture, restarting, and the discipline behind public work. Episodes stay streamable with archival care.",
+    "/shop":
+      "Merchandise extends the brand into objects you can hold — limited pieces that carry the same nocturnal studio language as the music and books.",
+    "/tutoring":
+      "Tutoring is the private room: one-to-one craft, jazz vocals, and arrangement coaching. Isaac built it so serious students can book, pay, and meet online without an account wall.",
+  },
+  roomPrimary: {
+    "/music": "Enter music room",
+    "/books": "Browse bookstore",
+    "/podcast": "Open podcast",
+    "/shop": "Enter shop",
+    "/tutoring": "Start with a session",
+  },
   musicIntro:
     "Open a release to sample in Now Playing — then continue on Spotify, Apple Music or YouTube.",
   selectedWorks: "Selected works",
@@ -81,6 +101,7 @@ const en = {
         "Upcoming episodes, song drops, mixtapes and newly released work.",
       empty: "No announcements yet.",
       viewAll: "View all announcements",
+      open: "Open announcement",
       latest: "Latest from the studio",
     },
     cart: {
@@ -371,6 +392,26 @@ const fr = {
   enter: "Entrer",
   close: "Fermer",
   keepBrowsing: "Continuer à parcourir",
+  openFullPage: "Ouvrir la page complète",
+  roomAims: {
+    "/music":
+      "La musique est le centre du craft public d’Isaac — sorties, stills de galerie et le fil entre les deux. Cette salle accueille l’écoute avant une session complète.",
+    "/books":
+      "La librairie regroupe éditions physiques et lectures numériques du bureau. Elle place l’écrit à côté du son — une couche plus lente et collectionnable de la même pratique.",
+    "/podcast":
+      "L’archive podcast dit le processus à voix haute : phrasé jazz, architecture de beats, redémarrages et discipline. Les épisodes restent diffusables avec soin d’archive.",
+    "/shop":
+      "Le merch prolonge la marque en objets — pièces limitées dans le même langage nocturne que la musique et les livres.",
+    "/tutoring":
+      "Le tutorat est la salle privée : craft en tête-à-tête, voix jazz et arrangement. Isaac l’a conçu pour réserver, payer et se rencontrer en ligne sans mur d’inscription.",
+  },
+  roomPrimary: {
+    "/music": "Entrer dans le salon",
+    "/books": "Voir la librairie",
+    "/podcast": "Ouvrir le podcast",
+    "/shop": "Entrer dans la boutique",
+    "/tutoring": "Commencer par une session",
+  },
   musicIntro:
     "Ouvrez une sortie pour l’échantillonner dans Now Playing — puis continuez sur Spotify, Apple Music ou YouTube.",
   selectedWorks: "Œuvres choisies",
@@ -427,6 +468,7 @@ const fr = {
         "Épisodes à venir, sorties, mixtapes et nouveautés du studio.",
       empty: "Aucune annonce pour le moment.",
       viewAll: "Voir toutes les annonces",
+      open: "Ouvrir l’annonce",
       latest: "Dernières nouvelles du studio",
     },
     cart: {

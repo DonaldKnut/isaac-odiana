@@ -133,6 +133,7 @@ export function AdminNav({
             <LanguageSwitcher className="hidden lg:inline-flex" />
             <button
               type="button"
+              data-tour="admin-alerts"
               onClick={() => setNotesOpen(true)}
               className="relative inline-flex h-9 w-9 cursor-pointer items-center justify-center border border-line text-sand transition hover:border-amber/45 hover:text-amber-bright min-[360px]:h-10 min-[360px]:w-auto min-[360px]:gap-2 min-[360px]:px-3"
               aria-haspopup="dialog"
@@ -150,6 +151,7 @@ export function AdminNav({
             </button>
             <Link
               href="/"
+              data-tour="admin-site-link"
               className="hidden h-10 items-center gap-2 border border-line px-3 text-sand transition hover:border-amber/45 hover:text-amber-bright md:inline-flex"
             >
               <Home className="h-4 w-4" strokeWidth={1.6} />
@@ -242,6 +244,7 @@ export function AdminNav({
               <Link
                 key={item.href}
                 href={item.href}
+                data-tour-nav={item.href}
                 title={item.label}
                 onClick={() => setSidebarOpen(false)}
                 className={cn(

@@ -3,8 +3,15 @@ import { PodcastArchive } from "@/components/podcast-archive";
 import { PodcastPromo } from "@/components/podcast-promo";
 import { studioMedia } from "@/lib/media";
 import { prisma } from "@/lib/prisma";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata = { title: "Podcast" };
+export const metadata = pageMetadata({
+  title: "Podcast",
+  description:
+    "Episodes on process, jazz phrasing, beat architecture and studio discipline — streamed from Isaac Odiana’s archive.",
+  path: "/podcast",
+  image: studioMedia.mic,
+});
 
 export default async function PodcastPage() {
   const episodes = await prisma.podcastEpisode.findMany({

@@ -3,8 +3,15 @@ import { PageHero } from "@/components/page-hero";
 import { ProductCatalogue } from "@/components/product-catalogue";
 import { studioMedia } from "@/lib/media";
 import { getPublishedProductCards } from "@/lib/products";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata = { title: "Books" };
+export const metadata = pageMetadata({
+  title: "Books",
+  description:
+    "Physical editions and digital reads from Isaac Odiana’s studio desk — guest checkout, no account required.",
+  path: "/books",
+  image: studioMedia.writing,
+});
 
 export default async function BooksPage() {
   const books = await getPublishedProductCards([

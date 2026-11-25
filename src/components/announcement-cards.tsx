@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import { useState } from "react";
 import {
   AudioLines,
   BookOpen,
@@ -9,6 +9,7 @@ import {
   Megaphone,
   Mic2,
 } from "lucide-react";
+import { StudioPreviewModal } from "@/components/studio-preview-modal";
 import { useLocale } from "@/components/locale-provider";
 import { useLocalized } from "@/components/localized";
 import type { AnnouncementItem } from "@/lib/cms/types";
@@ -33,7 +34,7 @@ const ctaByKind: Record<
   general: { en: "Open", fr: "Ouvrir" },
 };
 
-function hrefFor(item: AnnouncementItem) {
+export function hrefForAnnouncement(item: AnnouncementItem) {
   if (item.href) return item.href;
   switch (item.kind) {
     case "mixtape":
@@ -48,7 +49,49 @@ function hrefFor(item: AnnouncementItem) {
   }
 }
 
-/** Homepage teaser — each kind has its own composition. */
+function AnnouncementCardShell({
+  item,
+  className,
+  children,
+}: {
+  item: AnnouncementItem;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  const t = useLocalized();
+  const { locale, t: ui } = useLocale();
+  const [open, setOpen] = useState(false);
+  const href = hrefForAnnouncement(item);
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className={cn(
+          "group w-full cursor-pointer text-left transition",
+          className,
+        )}
+      >
+        {children}
+      </button>
+      <StudioPreviewModal
+        open={open}
+        onClose={() => setOpen(false)}
+        eyebrow={kindLabel[item.kind][locale]}
+        title={t(item.title)}
+        body={t(item.body)}
+        image={item.image}
+        primaryLabel={ctaByKind[item.kind][locale]}
+        primaryHref={href}
+        secondaryLabel={ui.pages.announcements.viewAll}
+        secondaryHref="/announcements"
+      />
+    </>
+  );
+}
+
+/** Homepage teaser — each kind has its own composition. Opens modal first. */
 export function HomeAnnouncementCard({
   item,
   className,
@@ -58,14 +101,13 @@ export function HomeAnnouncementCard({
 }) {
   const t = useLocalized();
   const { locale } = useLocale();
-  const href = hrefFor(item);
 
   if (item.kind === "mixtape") {
     return (
-      <Link
-        href={href}
+      <AnnouncementCardShell
+        item={item}
         className={cn(
-          "group relative flex min-h-[420px] flex-col justify-end overflow-hidden border border-line bg-ink",
+          "relative flex min-h-[420px] flex-col justify-end overflow-hidden border border-line bg-ink",
           className,
         )}
       >
@@ -97,16 +139,16 @@ export function HomeAnnouncementCard({
             {ctaByKind.mixtape[locale]}
           </span>
         </div>
-      </Link>
+      </AnnouncementCardShell>
     );
   }
 
   if (item.kind === "episode") {
     return (
-      <Link
-        href={href}
+      <AnnouncementCardShell
+        item={item}
         className={cn(
-          "group flex min-h-[420px] flex-col border border-line bg-ink-soft/40",
+          "flex min-h-[420px] flex-col border border-line bg-ink-soft/40",
           className,
         )}
       >
@@ -140,16 +182,16 @@ export function HomeAnnouncementCard({
             </span>
           </div>
         </div>
-      </Link>
+      </AnnouncementCardShell>
     );
   }
 
   if (item.kind === "drop") {
     return (
-      <Link
-        href={href}
+      <AnnouncementCardShell
+        item={item}
         className={cn(
-          "group grid min-h-[420px] grid-rows-[1.15fr_0.85fr] border border-line bg-ink",
+          "grid min-h-[420px] grid-rows-[1.15fr_0.85fr] border border-line bg-ink",
           className,
         )}
       >
@@ -182,15 +224,15 @@ export function HomeAnnouncementCard({
             {ctaByKind.drop[locale]}
           </span>
         </div>
-      </Link>
+      </AnnouncementCardShell>
     );
   }
 
   return (
-    <Link
-      href={href}
+    <AnnouncementCardShell
+      item={item}
       className={cn(
-        "group relative block min-h-[420px] overflow-hidden border border-line bg-ink",
+        "relative block min-h-[420px] overflow-hidden border border-line bg-ink",
         className,
       )}
     >
@@ -212,7 +254,7 @@ export function HomeAnnouncementCard({
         </h3>
         <p className="mt-2 text-sm text-smoke">{t(item.excerpt)}</p>
       </div>
-    </Link>
+    </AnnouncementCardShell>
   );
 }
 
@@ -224,150 +266,152 @@ export function AnnouncementArchiveCard({
 }) {
   const t = useLocalized();
   const { locale, t: ui } = useLocale();
-  const href = hrefFor(item);
-
-  if (item.kind === "mixtape") {
-    return (
-      <article className="overflow-hidden border border-line bg-ink">
-        <div className="grid lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="relative min-h-[320px] lg:min-h-[480px]">
-            <Image
-              src={item.image}
-              alt={t(item.title)}
-              fill
-              className="object-cover"
-              sizes="(max-width: 1024px) 100vw, 55vw"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent to-ink/40" />
-            <div className="absolute bottom-6 left-6 flex h-20 w-20 items-center justify-center rounded-full border border-amber/45 bg-ink/60 backdrop-blur-md">
-              <Disc3 className="h-9 w-9 text-amber-bright" strokeWidth={1.3} />
-            </div>
-          </div>
-          <div className="flex flex-col justify-center px-6 py-10 md:px-10">
-            <p className="text-[0.65rem] uppercase tracking-[0.22em] text-amber">
-              {kindLabel.mixtape[locale]}
-              {item.pinned ? " · Pinned" : ""}
-            </p>
-            <h2 className="mt-4 font-display text-4xl leading-tight text-parchment md:text-5xl">
-              {t(item.title)}
-            </h2>
-            <p className="mt-5 text-base leading-relaxed text-sand">
-              {t(item.body)}
-            </p>
-            <Link
-              href={href}
-              className="mt-8 inline-flex w-fit items-center gap-2 border border-amber/45 bg-amber/10 px-5 py-3 text-[0.65rem] uppercase tracking-[0.18em] text-amber-bright transition hover:bg-amber/20"
-            >
-              <Disc3 className="h-3.5 w-3.5" strokeWidth={1.6} />
-              {ctaByKind.mixtape[locale]}
-            </Link>
-          </div>
-        </div>
-      </article>
-    );
-  }
-
-  if (item.kind === "episode") {
-    return (
-      <article className="border border-line bg-ink-soft/30">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-6 py-4 md:px-10">
-          <p className="inline-flex items-center gap-2 text-[0.65rem] uppercase tracking-[0.2em] text-amber">
-            <Mic2 className="h-3.5 w-3.5" strokeWidth={1.6} />
-            {kindLabel.episode[locale]}
-          </p>
-          <AudioLines className="h-5 w-5 text-brass/60" strokeWidth={1.4} />
-        </div>
-        <div className="grid gap-0 lg:grid-cols-[0.75fr_1.25fr]">
-          <div className="relative min-h-[240px] border-b border-line lg:border-b-0 lg:border-r">
-            <Image
-              src={item.image}
-              alt={t(item.title)}
-              fill
-              className="object-cover grayscale"
-              sizes="(max-width: 1024px) 100vw, 35vw"
-            />
-          </div>
-          <div className="px-6 py-8 md:px-10 md:py-12">
-            <h2 className="font-display text-3xl text-parchment md:text-4xl">
-              {t(item.title)}
-            </h2>
-            <p className="mt-5 max-w-2xl text-base leading-relaxed text-smoke">
-              {t(item.body)}
-            </p>
-            <Link
-              href={href}
-              className="mt-8 inline-flex border-b border-amber/50 pb-1 text-[0.65rem] uppercase tracking-[0.18em] text-amber-bright transition hover:border-amber-bright"
-            >
-              {ctaByKind.episode[locale]} →
-            </Link>
-          </div>
-        </div>
-      </article>
-    );
-  }
-
-  if (item.kind === "drop") {
-    return (
-      <article className="grid overflow-hidden border border-line md:grid-cols-[0.7fr_1.3fr]">
-        <div className="relative min-h-[280px] bg-[#12100e] md:min-h-full">
-          <Image
-            src={item.image}
-            alt={t(item.title)}
-            fill
-            className="object-cover object-top"
-            sizes="(max-width: 768px) 100vw, 35vw"
-          />
-        </div>
-        <div className="flex flex-col justify-center px-6 py-10 md:px-12">
-          <div className="inline-flex w-fit items-center gap-2 border border-line px-3 py-1.5 text-[0.6rem] uppercase tracking-[0.18em] text-brass">
-            <BookOpen className="h-3.5 w-3.5" strokeWidth={1.6} />
-            {kindLabel.drop[locale]} · Restock
-          </div>
-          <h2 className="mt-5 font-display text-3xl text-parchment md:text-5xl">
-            {t(item.title)}
-          </h2>
-          <p className="mt-5 max-w-xl text-base leading-relaxed text-sand">
-            {t(item.body)}
-          </p>
-          <Link
-            href={href}
-            className="mt-8 inline-flex w-fit bg-parchment px-5 py-3 text-[0.65rem] uppercase tracking-[0.18em] text-ink transition hover:bg-amber"
-          >
-            {ctaByKind.drop[locale]}
-          </Link>
-        </div>
-      </article>
-    );
-  }
+  const [open, setOpen] = useState(false);
+  const href = hrefForAnnouncement(item);
 
   return (
-    <article className="grid overflow-hidden border border-line md:grid-cols-[0.9fr_1.1fr]">
-      <div className="relative min-h-[220px]">
-        <Image
-          src={item.image}
-          alt={t(item.title)}
-          fill
-          className="object-cover"
-          sizes="(max-width: 768px) 100vw, 40vw"
-        />
-      </div>
-      <div className="bg-ink-soft/30 px-6 py-8 md:px-10 md:py-10">
-        <p className="text-[0.65rem] uppercase tracking-[0.2em] text-amber">
-          {kindLabel[item.kind][locale]}
-        </p>
-        <h2 className="mt-3 font-display text-3xl text-parchment md:text-4xl">
-          {t(item.title)}
-        </h2>
-        <p className="mt-4 text-sm leading-relaxed text-sand md:text-base">
-          {t(item.body)}
-        </p>
-        <Link
-          href={href}
-          className="mt-6 inline-flex border border-amber/40 px-4 py-2 text-[0.65rem] uppercase tracking-[0.18em] text-amber-bright transition hover:bg-amber/10"
-        >
-          {ui.enter}
-        </Link>
-      </div>
-    </article>
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="w-full cursor-pointer text-left"
+      >
+        {item.kind === "mixtape" ? (
+          <article className="overflow-hidden border border-line bg-ink transition hover:border-amber/35">
+            <div className="grid lg:grid-cols-[1.1fr_0.9fr]">
+              <div className="relative min-h-[320px] lg:min-h-[480px]">
+                <Image
+                  src={item.image}
+                  alt={t(item.title)}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 1024px) 100vw, 55vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent to-ink/40" />
+                <div className="absolute bottom-6 left-6 flex h-20 w-20 items-center justify-center rounded-full border border-amber/45 bg-ink/60 backdrop-blur-md">
+                  <Disc3 className="h-9 w-9 text-amber-bright" strokeWidth={1.3} />
+                </div>
+              </div>
+              <div className="flex flex-col justify-center px-6 py-10 md:px-10">
+                <p className="text-[0.65rem] uppercase tracking-[0.22em] text-amber">
+                  {kindLabel.mixtape[locale]}
+                  {item.pinned ? " · Pinned" : ""}
+                </p>
+                <h2 className="mt-4 font-display text-4xl leading-tight text-parchment md:text-5xl">
+                  {t(item.title)}
+                </h2>
+                <p className="mt-5 text-base leading-relaxed text-sand">
+                  {t(item.excerpt)}
+                </p>
+                <span className="mt-8 inline-flex w-fit items-center gap-2 border border-amber/45 bg-amber/10 px-5 py-3 text-[0.65rem] uppercase tracking-[0.18em] text-amber-bright">
+                  <Disc3 className="h-3.5 w-3.5" strokeWidth={1.6} />
+                  {ctaByKind.mixtape[locale]}
+                </span>
+              </div>
+            </div>
+          </article>
+        ) : item.kind === "episode" ? (
+          <article className="border border-line bg-ink-soft/30 transition hover:border-amber/35">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-6 py-4 md:px-10">
+              <p className="inline-flex items-center gap-2 text-[0.65rem] uppercase tracking-[0.2em] text-amber">
+                <Mic2 className="h-3.5 w-3.5" strokeWidth={1.6} />
+                {kindLabel.episode[locale]}
+              </p>
+              <AudioLines className="h-5 w-5 text-brass/60" strokeWidth={1.4} />
+            </div>
+            <div className="grid gap-0 lg:grid-cols-[0.75fr_1.25fr]">
+              <div className="relative min-h-[240px] border-b border-line lg:border-b-0 lg:border-r">
+                <Image
+                  src={item.image}
+                  alt={t(item.title)}
+                  fill
+                  className="object-cover grayscale"
+                  sizes="(max-width: 1024px) 100vw, 35vw"
+                />
+              </div>
+              <div className="px-6 py-8 md:px-10 md:py-12">
+                <h2 className="font-display text-3xl text-parchment md:text-4xl">
+                  {t(item.title)}
+                </h2>
+                <p className="mt-5 max-w-2xl text-base leading-relaxed text-smoke">
+                  {t(item.excerpt)}
+                </p>
+                <span className="mt-8 inline-flex border-b border-amber/50 pb-1 text-[0.65rem] uppercase tracking-[0.18em] text-amber-bright">
+                  {ctaByKind.episode[locale]} →
+                </span>
+              </div>
+            </div>
+          </article>
+        ) : item.kind === "drop" ? (
+          <article className="grid overflow-hidden border border-line transition hover:border-amber/35 md:grid-cols-[0.7fr_1.3fr]">
+            <div className="relative min-h-[280px] bg-[#12100e] md:min-h-full">
+              <Image
+                src={item.image}
+                alt={t(item.title)}
+                fill
+                className="object-cover object-top"
+                sizes="(max-width: 768px) 100vw, 35vw"
+              />
+            </div>
+            <div className="flex flex-col justify-center px-6 py-10 md:px-12">
+              <div className="inline-flex w-fit items-center gap-2 border border-line px-3 py-1.5 text-[0.6rem] uppercase tracking-[0.18em] text-brass">
+                <BookOpen className="h-3.5 w-3.5" strokeWidth={1.6} />
+                {kindLabel.drop[locale]} · Restock
+              </div>
+              <h2 className="mt-5 font-display text-3xl text-parchment md:text-5xl">
+                {t(item.title)}
+              </h2>
+              <p className="mt-5 max-w-xl text-base leading-relaxed text-sand">
+                {t(item.excerpt)}
+              </p>
+              <span className="mt-8 inline-flex w-fit bg-parchment px-5 py-3 text-[0.65rem] uppercase tracking-[0.18em] text-ink">
+                {ctaByKind.drop[locale]}
+              </span>
+            </div>
+          </article>
+        ) : (
+          <article className="grid overflow-hidden border border-line transition hover:border-amber/35 md:grid-cols-[0.9fr_1.1fr]">
+            <div className="relative min-h-[220px]">
+              <Image
+                src={item.image}
+                alt={t(item.title)}
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 40vw"
+              />
+            </div>
+            <div className="bg-ink-soft/30 px-6 py-8 md:px-10 md:py-10">
+              <p className="text-[0.65rem] uppercase tracking-[0.2em] text-amber">
+                {kindLabel[item.kind][locale]}
+              </p>
+              <h2 className="mt-3 font-display text-3xl text-parchment md:text-4xl">
+                {t(item.title)}
+              </h2>
+              <p className="mt-4 text-sm leading-relaxed text-sand md:text-base">
+                {t(item.excerpt)}
+              </p>
+              <span className="mt-6 inline-flex border border-amber/40 px-4 py-2 text-[0.65rem] uppercase tracking-[0.18em] text-amber-bright">
+                {ui.enter}
+              </span>
+            </div>
+          </article>
+        )}
+      </button>
+
+      <StudioPreviewModal
+        open={open}
+        onClose={() => setOpen(false)}
+        eyebrow={kindLabel[item.kind][locale]}
+        title={t(item.title)}
+        body={t(item.body)}
+        image={item.image}
+        primaryLabel={ctaByKind[item.kind][locale]}
+        primaryHref={href}
+        secondaryLabel={
+          href !== "/announcements" ? ui.pages.announcements.viewAll : undefined
+        }
+        secondaryHref={href !== "/announcements" ? "/announcements" : undefined}
+      />
+    </>
   );
 }

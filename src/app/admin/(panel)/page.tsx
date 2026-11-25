@@ -61,7 +61,10 @@ export default async function AdminPage() {
         booking from this panel.
       </p>
 
-      <div className="mt-12 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div
+        data-tour="admin-stats"
+        className="mt-12 grid gap-4 sm:grid-cols-2 xl:grid-cols-3"
+      >
         {stats.map((stat) => {
           const Icon = adminStatIcons[stat.label] as LucideIcon;
           return (
@@ -87,7 +90,10 @@ export default async function AdminPage() {
         })}
       </div>
 
-      <div className="mt-12 border border-line px-6 py-8">
+      <div
+        data-tour="admin-checklist"
+        className="mt-12 border border-line px-6 py-8"
+      >
         <h2 className="font-display text-2xl text-parchment">Capability map</h2>
         <ul className="mt-5 space-y-3 text-sm">
           {checklist.map((item) => (

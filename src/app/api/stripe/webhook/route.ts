@@ -77,6 +77,15 @@ export async function POST(request: Request) {
             email: order.email,
             orderId: order.id,
             totalLabel: formatMoney(order.totalCents, order.currency),
+            customerName: order.shippingName,
+            items: existing.items.map((item) => ({
+              title: item.title,
+              quantity: item.quantity,
+              lineLabel: formatMoney(
+                item.unitCents * item.quantity,
+                order.currency,
+              ),
+            })),
           });
 
           await notifyAdmin({

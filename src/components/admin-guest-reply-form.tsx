@@ -15,11 +15,15 @@ export function AdminGuestReplyForm({
   id,
   guestName,
   defaultSubject,
+  meetingUrl,
+  slotLabel,
 }: {
   kind: "request" | "booking";
   id: string;
   guestName: string;
   defaultSubject: string;
+  meetingUrl?: string | null;
+  slotLabel?: string;
 }) {
   const toast = useToast();
   const action =
@@ -45,6 +49,36 @@ export function AdminGuestReplyForm({
           className="w-full border border-line bg-ink px-3 py-2 text-sm text-parchment outline-none focus:border-amber/50"
         />
       </label>
+
+      {kind === "booking" ? (
+        <>
+          {slotLabel ? (
+            <p className="text-xs text-smoke">Session · {slotLabel}</p>
+          ) : null}
+          <label className="block space-y-1.5">
+            <span className="text-[0.6rem] uppercase tracking-[0.16em] text-smoke">
+              Meeting link (Zoom / Meet)
+            </span>
+            <input
+              name="meetingUrl"
+              type="url"
+              defaultValue={meetingUrl ?? ""}
+              placeholder="https://meet.google.com/…"
+              className="w-full border border-line bg-ink px-3 py-2 text-sm text-parchment outline-none focus:border-amber/50"
+            />
+          </label>
+          <label className="inline-flex cursor-pointer items-center gap-2 text-xs text-sand">
+            <input
+              type="checkbox"
+              name="includeCalendar"
+              defaultChecked
+              className="accent-amber"
+            />
+            Include Google Calendar link
+          </label>
+        </>
+      ) : null}
+
       <textarea
         name="message"
         required

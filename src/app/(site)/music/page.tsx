@@ -10,8 +10,15 @@ import {
   getMusicWorksContent,
 } from "@/lib/cms/content";
 import { studioMedia } from "@/lib/media";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata = { title: "Music" };
+export const metadata = pageMetadata({
+  title: "Music",
+  description:
+    "Releases, visuals and gallery pieces from Isaac Odiana — sample in Now Playing, then continue on Spotify, Apple Music or YouTube.",
+  path: "/music",
+  image: studioMedia.jazzStage,
+});
 
 export default async function MusicPage() {
   await ensureCmsDefaults();

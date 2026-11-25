@@ -29,7 +29,7 @@ export default async function AdminOrdersPage() {
       <AdminPageHeading
         icon={WalletCards}
         title="Orders"
-        description="Track every guest purchase by customer email (and name when given). No public signup — Stripe + webhook marks PAID."
+        description="Track every guest purchase by email. Stripe marks PAID and emails the guest; mark FULFILLED here to send the shipping / delivery note."
       />
 
       <div className="mt-10">

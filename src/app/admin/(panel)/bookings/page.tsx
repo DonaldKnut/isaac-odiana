@@ -44,11 +44,25 @@ export default async function AdminBookingsPage() {
               <p className="mt-1 text-sm text-smoke">
                 {formatSlotRange(booking.slot.startsAt, booking.slot.endsAt)}
               </p>
+              {booking.meetingUrl ? (
+                <p className="mt-2 truncate text-xs text-amber-bright">
+                  Meeting · {booking.meetingUrl}
+                </p>
+              ) : (
+                <p className="mt-2 text-xs text-smoke">
+                  No meeting link yet — add one in the reply below.
+                </p>
+              )}
               <AdminGuestReplyForm
                 kind="booking"
                 id={booking.id}
                 guestName={booking.guestName}
                 defaultSubject={`Update · ${booking.session.title}`}
+                meetingUrl={booking.meetingUrl}
+                slotLabel={formatSlotRange(
+                  booking.slot.startsAt,
+                  booking.slot.endsAt,
+                )}
               />
             </article>
           ))}

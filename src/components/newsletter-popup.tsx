@@ -10,9 +10,16 @@ import {
 import { useLocale } from "@/components/locale-provider";
 import { useToast } from "@/components/toast-provider";
 import { UiButton } from "@/components/ui-button";
+import {
+  claimSitePromo,
+  getSitePromoHolder,
+  releaseSitePromo,
+  subscribeSitePromo,
+} from "@/lib/site-promo";
 
 const STORAGE_KEY = "isaac-newsletter-dismissed";
 const DELAY_MS = 18000;
+const RETRY_MS = 4000;
 const initial: NewsletterState = { ok: false, message: "" };
 
 export function NewsletterPopup() {
@@ -25,8 +32,38 @@ export function NewsletterPopup() {
     if (typeof window === "undefined") return;
     if (localStorage.getItem(STORAGE_KEY)) return;
 
-    const timer = window.setTimeout(() => setOpen(true), DELAY_MS);
-    return () => window.clearTimeout(timer);
+    let cancelled = false;
+    let retryTimer: number | undefined;
+
+    const tryOpen = () => {
+      if (cancelled || localStorage.getItem(STORAGE_KEY)) return;
+      if (getSitePromoHolder() && getSitePromoHolder() !== "newsletter") {
+        retryTimer = window.setTimeout(tryOpen, RETRY_MS);
+        return;
+      }
+      if (!claimSitePromo("newsletter")) {
+        retryTimer = window.setTimeout(tryOpen, RETRY_MS);
+        return;
+      }
+      setOpen(true);
+    };
+
+    const timer = window.setTimeout(tryOpen, DELAY_MS);
+    const unsubscribe = subscribeSitePromo(() => {
+      if (cancelled || open || localStorage.getItem(STORAGE_KEY)) return;
+      if (!getSitePromoHolder()) {
+        retryTimer = window.setTimeout(tryOpen, RETRY_MS);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+      if (retryTimer) window.clearTimeout(retryTimer);
+      unsubscribe();
+      releaseSitePromo("newsletter");
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -35,6 +72,7 @@ export function NewsletterPopup() {
       toast.success("Subscribed", state.message);
       localStorage.setItem(STORAGE_KEY, "1");
       setOpen(false);
+      releaseSitePromo("newsletter");
     } else {
       toast.error("Couldn’t subscribe", state.message);
     }
@@ -44,6 +82,7 @@ export function NewsletterPopup() {
   function dismiss() {
     localStorage.setItem(STORAGE_KEY, "1");
     setOpen(false);
+    releaseSitePromo("newsletter");
   }
 
   return (

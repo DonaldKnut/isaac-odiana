@@ -1,8 +1,9 @@
 "use client";
 
-import Link from "next/link";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { UserRound } from "lucide-react";
+import { BookCtaModal } from "@/components/book-cta-modal";
 import { CmsEditableImage } from "@/components/cms-editable-image";
 import { Reveal, RevealGroup, RevealItem } from "@/components/reveal";
 import { useLocalized } from "@/components/localized";
@@ -10,6 +11,10 @@ import type { HomeAboutContent } from "@/lib/cms/types";
 
 export function HomeAbout({ content }: { content: HomeAboutContent }) {
   const t = useLocalized();
+  const [bookOpen, setBookOpen] = useState(false);
+  const opensSession =
+    content.ctaHref === "/tutoring" ||
+    content.ctaHref.startsWith("/tutoring");
 
   return (
     <section className="relative overflow-hidden border-t border-line bg-ink">
@@ -44,12 +49,22 @@ export function HomeAbout({ content }: { content: HomeAboutContent }) {
             <p className="mt-6 max-w-xl text-base leading-relaxed text-smoke md:text-lg">
               {t(content.body)}
             </p>
-            <Link
-              href={content.ctaHref}
-              className="mt-10 inline-flex border border-amber/45 px-6 py-3 text-[0.65rem] font-medium uppercase tracking-[0.22em] text-amber-bright transition duration-500 hover:border-amber-bright hover:bg-amber/10"
-            >
-              {t(content.cta)}
-            </Link>
+            {opensSession ? (
+              <button
+                type="button"
+                onClick={() => setBookOpen(true)}
+                className="mt-10 inline-flex cursor-pointer border border-amber/45 px-6 py-3 text-[0.65rem] font-medium uppercase tracking-[0.22em] text-amber-bright transition duration-500 hover:border-amber-bright hover:bg-amber/10"
+              >
+                {t(content.cta)}
+              </button>
+            ) : (
+              <a
+                href={content.ctaHref}
+                className="mt-10 inline-flex border border-amber/45 px-6 py-3 text-[0.65rem] font-medium uppercase tracking-[0.22em] text-amber-bright transition duration-500 hover:border-amber-bright hover:bg-amber/10"
+              >
+                {t(content.cta)}
+              </a>
+            )}
           </Reveal>
 
           <RevealGroup className="mt-14 space-y-0 border-t border-line">
@@ -80,6 +95,8 @@ export function HomeAbout({ content }: { content: HomeAboutContent }) {
           </RevealGroup>
         </div>
       </div>
+
+      <BookCtaModal open={bookOpen} onClose={() => setBookOpen(false)} />
     </section>
   );
 }

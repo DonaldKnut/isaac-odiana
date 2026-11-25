@@ -5,84 +5,176 @@ import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { Compass, Route, X } from "lucide-react";
 
+type GuideStep = {
+  body: string;
+  target?: string;
+};
+
 type Guide = {
   title: string;
-  steps: string[];
+  steps: GuideStep[];
 };
 
 const GUIDES: Record<string, Guide> = {
   "/admin": {
     title: "Studio dashboard",
     steps: [
-      "Read the live counts — orders, bookings, open slots and catalogue size.",
-      "Use the capability checklist to confirm Stripe, Resend and Cloudinary keys.",
-      "Open any tile to jump into that workflow.",
-      "Customers never sign up: they checkout and book as guests with their email.",
+      {
+        body: "Read the live counts — orders, bookings, open slots and catalogue size.",
+        target: '[data-tour="admin-stats"]',
+      },
+      {
+        body: "Use the capability checklist to confirm Stripe, Resend and Cloudinary keys.",
+        target: '[data-tour="admin-checklist"]',
+      },
+      {
+        body: "Open any tile to jump into that workflow.",
+        target: '[data-tour="admin-stats"]',
+      },
+      {
+        body: "Customers never sign up: they checkout and book as guests with their email.",
+        target: '[data-tour="admin-stats"]',
+      },
     ],
   },
   "/admin/content": {
     title: "Edit site content",
     steps: [
-      "Homepage includes studio feed clips (video / Instagram) that appear publicly after save.",
-      "Music works: galleries, sample audio, track previews, and Spotify/Apple/YouTube links.",
-      "While logged in, open the public homepage and tap Edit image on any card to replace it live.",
-      "Products are edited under Products; podcasts under Podcast; announcements under Announcements.",
+      {
+        body: "Homepage includes studio feed clips (video / Instagram) that appear publicly after save.",
+        target: '[data-tour-nav="/admin/content"]',
+      },
+      {
+        body: "Music works: galleries, sample audio, track previews, and Spotify/Apple/YouTube links.",
+        target: '[data-tour-nav="/admin/content"]',
+      },
+      {
+        body: "While logged in, open the public homepage and tap Edit image on any card to replace it live.",
+        target: '[data-tour="admin-site-link"]',
+      },
+      {
+        body: "Products are edited under Products; podcasts under Podcast; announcements under Announcements.",
+        target: '[data-tour-nav="/admin/products"]',
+      },
     ],
   },
   "/admin/announcements": {
     title: "Announcements board",
     steps: [
-      "Publish mixtapes, episode teases, song drops and restocks.",
-      "Pinned items rise to the top of the public board and homepage strip.",
-      "The floating callout on the homepage expands for visitors when something new lands.",
+      {
+        body: "Publish mixtapes, episode teases, song drops and restocks.",
+        target: '[data-tour-nav="/admin/announcements"]',
+      },
+      {
+        body: "Pinned items rise to the top of the public board and homepage strip.",
+        target: '[data-tour-nav="/admin/announcements"]',
+      },
+      {
+        body: "The floating callout appears on non-home pages for unseen drops — never stacked with the newsletter.",
+        target: '[data-tour-nav="/admin/announcements"]',
+      },
     ],
   },
   "/admin/products": {
     title: "Catalogue",
     steps: [
-      "Create or edit books and merch with price, stock and gallery images.",
-      "Use Edit on any row to update an existing product.",
-      "Publish to show on /books or /shop — guests buy with email only.",
+      {
+        body: "Create or edit books and merch with price, stock and gallery images.",
+        target: '[data-tour-nav="/admin/products"]',
+      },
+      {
+        body: "Use Edit on any row to update an existing product.",
+        target: '[data-tour-nav="/admin/products"]',
+      },
+      {
+        body: "Publish to show on /books or /shop — guests buy with email only.",
+        target: '[data-tour-nav="/admin/products"]',
+      },
     ],
   },
   "/admin/podcast": {
     title: "Podcast episodes",
     steps: [
-      "Compose an episode, attach cover + audio, then publish.",
-      "Use Edit on any row to update title, media or publish state.",
-      "Published episodes appear on /podcast for listening.",
+      {
+        body: "Compose an episode, attach cover + audio, then publish.",
+        target: '[data-tour-nav="/admin/podcast"]',
+      },
+      {
+        body: "Use Edit on any row to update title, media or publish state.",
+        target: '[data-tour-nav="/admin/podcast"]',
+      },
+      {
+        body: "Published episodes appear on /podcast for listening.",
+        target: '[data-tour-nav="/admin/podcast"]',
+      },
     ],
   },
   "/admin/sessions": {
     title: "Tutoring sessions",
     steps: [
-      "Create session types (price, duration, EN/FR copy).",
-      "Add open calendar slots customers can book on /tutoring.",
-      "Booked slots lock until payment webhook confirms or you manage them.",
+      {
+        body: "Create session types (price, duration, EN/FR copy).",
+        target: '[data-tour-nav="/admin/sessions"]',
+      },
+      {
+        body: "Add open calendar slots customers can book on /tutoring.",
+        target: '[data-tour-nav="/admin/sessions"]',
+      },
+      {
+        body: "Booked slots lock until payment webhook confirms or you manage them.",
+        target: '[data-tour-nav="/admin/sessions"]',
+      },
     ],
   },
   "/admin/bookings": {
     title: "Bookings & requests",
     steps: [
-      "Slot bookings show guest name + email and session time.",
-      "Mentorship requests are custom-time enquiries from the Book modal.",
-      "Reply from this page — guests receive your message by email.",
+      {
+        body: "Slot bookings show guest name + email and session time.",
+        target: '[data-tour-nav="/admin/bookings"]',
+      },
+      {
+        body: "Mentorship requests are custom-time enquiries from the Book modal.",
+        target: '[data-tour-nav="/admin/bookings"]',
+      },
+      {
+        body: "Reply from this page — guests receive your message by email.",
+        target: '[data-tour-nav="/admin/bookings"]',
+      },
     ],
   },
   "/admin/orders": {
     title: "Orders & customers",
     steps: [
-      "Each order stores customer email (and name when provided) — no account required.",
-      "Expand a row to see line items, totals and fulfilment context.",
-      "Status moves to PAID when the Stripe webhook confirms payment.",
+      {
+        body: "Each order stores customer email (and name when provided) — no account required.",
+        target: '[data-tour-nav="/admin/orders"]',
+      },
+      {
+        body: "Expand a row to see line items, totals and fulfilment context.",
+        target: '[data-tour-nav="/admin/orders"]',
+      },
+      {
+        body: "Status moves to PAID when the Stripe webhook confirms payment.",
+        target: '[data-tour-nav="/admin/orders"]',
+      },
     ],
   },
   "/admin/notifications": {
     title: "Full notifications inbox",
     steps: [
-      "This page is the archive — day-to-day alerts open from the bell modal.",
-      "Expand any notification for detail, then mark read or open the related page.",
-      "Newsletter subscribers are listed below for audience tracking.",
+      {
+        body: "This page is the archive — day-to-day alerts open from the bell modal.",
+        target: '[data-tour="admin-alerts"]',
+      },
+      {
+        body: "Expand any notification for detail, then mark read or open the related page.",
+        target: '[data-tour="admin-alerts"]',
+      },
+      {
+        body: "Newsletter subscribers are listed below for audience tracking.",
+        target: '[data-tour="admin-alerts"]',
+      },
     ],
   },
 };
@@ -90,11 +182,26 @@ const GUIDES: Record<string, Guide> = {
 const STUDIO_TOUR: Guide = {
   title: "Studio tour",
   steps: [
-    "This dashboard runs the public Isaac Odiana site — content, catalogue, sessions and guest commerce.",
-    "Use Content for homepage/music copy, Announcements for drops and mixtapes, Products for the shop.",
-    "Sessions + Bookings cover tutoring. Reply to guests from Bookings so they get your email.",
-    "Orders track Stripe checkouts by guest email. Alerts stay in the bell for quick triage.",
-    "On desktop, dock or collapse the sidebar. Page guides only auto-open the first time — reopen anytime with Page guide.",
+    {
+      body: "This dashboard runs the public Isaac Odiana site — content, catalogue, sessions and guest commerce.",
+      target: '[data-tour="admin-stats"]',
+    },
+    {
+      body: "Use Content for homepage/music copy, Announcements for drops and mixtapes, Products for the shop.",
+      target: '[data-tour-nav="/admin/content"]',
+    },
+    {
+      body: "Sessions + Bookings cover tutoring. Reply to guests from Bookings so they get your email.",
+      target: '[data-tour-nav="/admin/sessions"]',
+    },
+    {
+      body: "Orders track Stripe checkouts by guest email. Alerts stay in the bell for quick triage.",
+      target: '[data-tour="admin-alerts"]',
+    },
+    {
+      body: "On desktop, dock or collapse the sidebar. Page guides only auto-open the first time — reopen anytime with Page guide.",
+      target: '[data-tour="admin-guide-actions"]',
+    },
   ],
 };
 
@@ -104,6 +211,57 @@ function guideKey(pathname: string) {
     .filter((key) => key !== "/admin")
     .find((key) => pathname.startsWith(key));
   return match ?? "/admin";
+}
+
+function TourSpotlight({ selector }: { selector?: string }) {
+  const [rect, setRect] = useState<DOMRect | null>(null);
+
+  useEffect(() => {
+    if (!selector) {
+      setRect(null);
+      return;
+    }
+
+    let frame = 0;
+    const measure = () => {
+      const el = document.querySelector(selector) as HTMLElement | null;
+      if (!el) {
+        setRect(null);
+        return;
+      }
+      el.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+      setRect(el.getBoundingClientRect());
+    };
+
+    frame = window.requestAnimationFrame(measure);
+    window.addEventListener("resize", measure);
+    window.addEventListener("scroll", measure, true);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("resize", measure);
+      window.removeEventListener("scroll", measure, true);
+    };
+  }, [selector]);
+
+  if (!rect) {
+    return <div className="pointer-events-none absolute inset-0 bg-ink/70" />;
+  }
+
+  const pad = 10;
+  return (
+    <div
+      aria-hidden
+      className="pointer-events-none absolute rounded-sm border border-amber/70 bg-amber/5 shadow-[0_0_0_9999px_rgba(13,12,11,0.78)] transition-all duration-300"
+      style={{
+        top: Math.max(8, rect.top - pad),
+        left: Math.max(8, rect.left - pad),
+        width: rect.width + pad * 2,
+        height: rect.height + pad * 2,
+      }}
+    >
+      <span className="absolute -inset-1 animate-pulse rounded-sm border border-amber-bright/40" />
+    </div>
+  );
 }
 
 export function AdminPageGuide() {
@@ -117,6 +275,7 @@ export function AdminPageGuide() {
   const [tourMode, setTourMode] = useState(false);
   const [step, setStep] = useState(0);
   const activeGuide = tourMode ? STUDIO_TOUR : guide;
+  const current = activeGuide.steps[step]!;
 
   useEffect(() => {
     setStep(0);
@@ -124,7 +283,6 @@ export function AdminPageGuide() {
     setOpen(false);
     if (typeof window === "undefined") return;
 
-    // Full studio tour once on first dashboard visit.
     if (pathname === "/admin" && !localStorage.getItem(tourKey)) {
       const timer = window.setTimeout(() => {
         setTourMode(true);
@@ -133,7 +291,6 @@ export function AdminPageGuide() {
       return () => window.clearTimeout(timer);
     }
 
-    // Per-page guide only the first time that page is opened.
     if (localStorage.getItem(storageKey)) return;
     const timer = window.setTimeout(() => setOpen(true), 700);
     return () => window.clearTimeout(timer);
@@ -156,7 +313,10 @@ export function AdminPageGuide() {
 
   return (
     <>
-      <div className="mb-6 flex flex-wrap gap-2">
+      <div
+        data-tour="admin-guide-actions"
+        className="mb-6 flex flex-wrap gap-2"
+      >
         <button
           type="button"
           onClick={() => openGuide(false)}
@@ -178,17 +338,25 @@ export function AdminPageGuide() {
       <AnimatePresence>
         {open ? (
           <motion.div
-            className="fixed inset-0 z-[120] flex items-end justify-center bg-ink/75 p-4 backdrop-blur-sm sm:items-center"
+            className="fixed inset-0 z-[120]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={dismiss}
           >
+            <TourSpotlight selector={current.target} />
+
+            <button
+              type="button"
+              className="absolute inset-0 cursor-pointer"
+              aria-label="Close guide"
+              onClick={dismiss}
+            />
+
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 12 }}
-              className="w-full max-w-lg border border-line bg-ink-soft p-6 sm:p-7"
+              className="absolute bottom-4 left-1/2 z-[121] w-[min(92vw,28rem)] -translate-x-1/2 border border-line bg-ink-soft p-5 shadow-[0_24px_80px_rgba(0,0,0,0.45)] sm:bottom-8 sm:p-6"
               role="dialog"
               aria-modal="true"
               aria-labelledby="admin-guide-title"
@@ -218,7 +386,7 @@ export function AdminPageGuide() {
               </div>
 
               <p className="mt-5 text-sm leading-relaxed text-smoke">
-                {activeGuide.steps[step]}
+                {current.body}
               </p>
 
               <div className="mt-8 flex items-center justify-end gap-2">

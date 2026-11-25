@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   BookOpen,
@@ -10,9 +10,11 @@ import {
   Sparkles,
   type LucideIcon,
 } from "lucide-react";
+import { BookCtaModal } from "@/components/book-cta-modal";
 import { CmsEditableImage } from "@/components/cms-editable-image";
 import { Reveal } from "@/components/reveal";
 import { IconBadge } from "@/components/illustrations";
+import { StudioPreviewModal } from "@/components/studio-preview-modal";
 import { useLocale } from "@/components/locale-provider";
 import { useLocalized } from "@/components/localized";
 import type { HomeWorldContent } from "@/lib/cms/types";
@@ -25,9 +27,22 @@ const roomIcons: Record<string, LucideIcon> = {
   "/tutoring": Sparkles,
 };
 
+type RoomKey = keyof typeof roomIcons;
+
 export function HomeWorld({ content }: { content: HomeWorldContent }) {
   const t = useLocalized();
   const { t: ui } = useLocale();
+  const [activeHref, setActiveHref] = useState<string | null>(null);
+  const [bookOpen, setBookOpen] = useState(false);
+
+  const active = content.rooms.find((room) => room.href === activeHref) ?? null;
+  const roomKey = (active?.href ?? "") as RoomKey;
+  const aim =
+    ui.roomAims[roomKey as keyof typeof ui.roomAims] ??
+    (active ? t(active.copy) : "");
+  const primaryLabel =
+    ui.roomPrimary[roomKey as keyof typeof ui.roomPrimary] ?? ui.enter;
+  const isTutoring = active?.href === "/tutoring";
 
   return (
     <section className="border-t border-line bg-ink">
@@ -64,9 +79,10 @@ export function HomeWorld({ content }: { content: HomeWorldContent }) {
       <div className="grid md:grid-cols-2 xl:grid-cols-4">
         {content.rooms.map((item, index) => (
           <Reveal key={`${item.href}-${index}`} delay={index * 0.06}>
-            <Link
-              href={item.href}
-              className="group relative block min-h-[360px] overflow-hidden border-t border-line md:border-l xl:min-h-[420px]"
+            <button
+              type="button"
+              onClick={() => setActiveHref(item.href)}
+              className="group relative block min-h-[360px] w-full cursor-pointer overflow-hidden border-t border-line text-left md:border-l xl:min-h-[420px]"
             >
               <CmsEditableImage
                 src={item.image}
@@ -97,10 +113,35 @@ export function HomeWorld({ content }: { content: HomeWorldContent }) {
                   {t(item.copy)}
                 </p>
               </div>
-            </Link>
+            </button>
           </Reveal>
         ))}
       </div>
+
+      {active ? (
+        <StudioPreviewModal
+          open={Boolean(active)}
+          onClose={() => setActiveHref(null)}
+          eyebrow={ui.enter}
+          title={t(active.title)}
+          body={aim}
+          image={active.image}
+          primaryLabel={primaryLabel}
+          primaryHref={isTutoring ? undefined : active.href}
+          onPrimary={
+            isTutoring
+              ? () => {
+                  setActiveHref(null);
+                  setBookOpen(true);
+                }
+              : undefined
+          }
+          secondaryLabel={isTutoring ? ui.openFullPage : undefined}
+          secondaryHref={isTutoring ? "/tutoring" : undefined}
+        />
+      ) : null}
+
+      <BookCtaModal open={bookOpen} onClose={() => setBookOpen(false)} />
     </section>
   );
 }

@@ -19,7 +19,11 @@ import { siteNavIcons } from "@/components/illustrations";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { useLocale } from "@/components/locale-provider";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
+import { StudioPreviewModal } from "@/components/studio-preview-modal";
+import { studioMedia } from "@/lib/media";
 import { cn } from "@/lib/utils";
+
+type StudioPreview = "announcements" | "tutoring" | null;
 
 export function SiteHeader({ adminOffset = false }: { adminOffset?: boolean }) {
   const { count, openDrawer, drawerOpen } = useCart();
@@ -28,11 +32,35 @@ export function SiteHeader({ adminOffset = false }: { adminOffset?: boolean }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [bookOpen, setBookOpen] = useState(false);
   const [megaOpen, setMegaOpen] = useState(false);
+  const [studioPreview, setStudioPreview] = useState<StudioPreview>(null);
   const [cartReady, setCartReady] = useState(false);
   const megaRef = useRef<HTMLDivElement>(null);
+  const megaCloseTimer = useRef<number | null>(null);
 
   useEffect(() => {
     setCartReady(true);
+  }, []);
+
+  function openMega() {
+    if (megaCloseTimer.current) {
+      window.clearTimeout(megaCloseTimer.current);
+      megaCloseTimer.current = null;
+    }
+    setMegaOpen(true);
+  }
+
+  function scheduleCloseMega() {
+    if (megaCloseTimer.current) window.clearTimeout(megaCloseTimer.current);
+    megaCloseTimer.current = window.setTimeout(() => {
+      setMegaOpen(false);
+      megaCloseTimer.current = null;
+    }, 140);
+  }
+
+  useEffect(() => {
+    return () => {
+      if (megaCloseTimer.current) window.clearTimeout(megaCloseTimer.current);
+    };
   }, []);
 
   const links = [
@@ -47,8 +75,19 @@ export function SiteHeader({ adminOffset = false }: { adminOffset?: boolean }) {
     { href: "/books", label: t.nav.books, icon: siteNavIcons.books },
     { href: "/podcast", label: t.nav.podcast, icon: siteNavIcons.podcast },
     { href: "/shop", label: t.nav.shop, icon: siteNavIcons.shop },
-    { href: "/announcements", label: t.nav.announcements, icon: Megaphone },
-    { href: "/tutoring", label: t.nav.tutoring, icon: siteNavIcons.tutoring },
+  ];
+
+  const mobileStudio = [
+    {
+      key: "announcements" as const,
+      label: t.nav.announcements,
+      icon: Megaphone,
+    },
+    {
+      key: "tutoring" as const,
+      label: t.nav.tutoring,
+      icon: siteNavIcons.tutoring,
+    },
   ];
 
   useEffect(() => {
@@ -88,7 +127,8 @@ export function SiteHeader({ adminOffset = false }: { adminOffset?: boolean }) {
     setBookOpen(true);
   }
 
-  const hideBottomNav = menuOpen || bookOpen || drawerOpen;
+  const hideBottomNav =
+    menuOpen || bookOpen || drawerOpen || Boolean(studioPreview);
 
   return (
     <>
@@ -123,10 +163,20 @@ export function SiteHeader({ adminOffset = false }: { adminOffset?: boolean }) {
               </Link>
             ))}
 
-            <div ref={megaRef} className="relative">
+            <div
+              ref={megaRef}
+              className="relative"
+              onMouseEnter={openMega}
+              onMouseLeave={scheduleCloseMega}
+              onFocusCapture={openMega}
+              onBlurCapture={(event) => {
+                if (!megaRef.current?.contains(event.relatedTarget as Node)) {
+                  scheduleCloseMega();
+                }
+              }}
+            >
               <button
                 type="button"
-                onClick={() => setMegaOpen((value) => !value)}
                 aria-expanded={megaOpen}
                 aria-haspopup="true"
                 className={cn(
@@ -153,16 +203,19 @@ export function SiteHeader({ adminOffset = false }: { adminOffset?: boolean }) {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 8 }}
                     transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-                    className="absolute left-1/2 top-full z-50 mt-5 w-[min(92vw,34rem)] -translate-x-1/2 border border-line bg-ink/98 p-5 shadow-[0_30px_80px_rgba(0,0,0,0.45)] backdrop-blur-xl"
+                    className="absolute left-1/2 top-full z-50 w-[min(92vw,34rem)] -translate-x-1/2 border border-line bg-ink/98 p-5 pt-8 shadow-[0_30px_80px_rgba(0,0,0,0.45)] backdrop-blur-xl before:absolute before:inset-x-0 before:-top-5 before:h-5 before:content-['']"
                   >
                     <p className="text-[0.6rem] uppercase tracking-[0.22em] text-amber">
                       {t.nav.studio}
                     </p>
                     <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                      <Link
-                        href="/announcements"
-                        onClick={() => setMegaOpen(false)}
-                        className="group border border-line bg-ink-soft/50 p-4 transition hover:border-amber/40"
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMegaOpen(false);
+                          setStudioPreview("announcements");
+                        }}
+                        className="group cursor-pointer border border-line bg-ink-soft/50 p-4 text-left transition hover:border-amber/40"
                       >
                         <Megaphone
                           className="h-4 w-4 text-amber"
@@ -174,11 +227,14 @@ export function SiteHeader({ adminOffset = false }: { adminOffset?: boolean }) {
                         <p className="mt-2 text-sm leading-relaxed text-smoke">
                           {t.pages.announcements.description}
                         </p>
-                      </Link>
-                      <Link
-                        href="/tutoring"
-                        onClick={() => setMegaOpen(false)}
-                        className="group border border-line bg-ink-soft/50 p-4 transition hover:border-amber/40"
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMegaOpen(false);
+                          setStudioPreview("tutoring");
+                        }}
+                        className="group cursor-pointer border border-line bg-ink-soft/50 p-4 text-left transition hover:border-amber/40"
                       >
                         <Sparkles
                           className="h-4 w-4 text-amber"
@@ -190,7 +246,7 @@ export function SiteHeader({ adminOffset = false }: { adminOffset?: boolean }) {
                         <p className="mt-2 text-sm leading-relaxed text-smoke">
                           {t.pages.tutoring.description}
                         </p>
-                      </Link>
+                      </button>
                     </div>
                     <button
                       type="button"
@@ -317,6 +373,36 @@ export function SiteHeader({ adminOffset = false }: { adminOffset?: boolean }) {
                   </motion.div>
                 );
               })}
+
+              <p className="mt-6 text-[0.65rem] uppercase tracking-[0.22em] text-amber">
+                {t.nav.studio}
+              </p>
+              {mobileStudio.map((item, index) => {
+                const Icon = item.icon;
+                return (
+                  <motion.div
+                    key={item.key}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.05 * (mobileLinks.length + index) }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        setStudioPreview(item.key);
+                      }}
+                      className="flex w-full cursor-pointer items-center gap-3 border-b border-line py-3.5 text-left font-display text-2xl text-parchment min-[360px]:py-4 min-[360px]:text-3xl"
+                    >
+                      <Icon
+                        className="h-5 w-5 shrink-0 text-amber"
+                        strokeWidth={1.5}
+                      />
+                      {item.label}
+                    </button>
+                  </motion.div>
+                );
+              })}
               <button
                 type="button"
                 onClick={openBook}
@@ -352,6 +438,29 @@ export function SiteHeader({ adminOffset = false }: { adminOffset?: boolean }) {
         <MobileBottomNav isAdmin={adminOffset} />
       ) : null}
       <BookCtaModal open={bookOpen} onClose={() => setBookOpen(false)} />
+
+      <StudioPreviewModal
+        open={studioPreview === "announcements"}
+        onClose={() => setStudioPreview(null)}
+        eyebrow={t.nav.studio}
+        title={t.nav.announcements}
+        body={t.pages.announcements.description}
+        image={studioMedia.vinyl}
+        primaryLabel={t.pages.announcements.viewAll}
+        primaryHref="/announcements"
+      />
+      <StudioPreviewModal
+        open={studioPreview === "tutoring"}
+        onClose={() => setStudioPreview(null)}
+        eyebrow={t.nav.studio}
+        title={t.nav.tutoring}
+        body={t.roomAims["/tutoring"]}
+        image={studioMedia.mentorship}
+        primaryLabel={t.nav.bookSession}
+        onPrimary={() => setBookOpen(true)}
+        secondaryLabel={t.openFullPage}
+        secondaryHref="/tutoring"
+      />
     </>
   );
 }

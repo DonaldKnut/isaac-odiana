@@ -109,14 +109,58 @@ export async function sendOrderPaidEmail(input: {
   email: string;
   orderId: string;
   totalLabel: string;
+  customerName?: string | null;
+  items?: Array<{ title: string; quantity: number; lineLabel: string }>;
 }) {
+  const lines =
+    input.items
+      ?.map(
+        (item) =>
+          `<li style="margin:0 0 8px">${item.title} ×${item.quantity} — ${item.lineLabel}</li>`,
+      )
+      .join("") ?? "";
+
   await sendMail({
     to: input.email,
     subject: `Order confirmed · ${input.orderId}`,
     html: `
       <div style="font-family:Georgia,serif;background:#0b0a09;color:#f2ebe1;padding:32px">
+        <p style="letter-spacing:0.2em;text-transform:uppercase;color:#c6a15b;font-size:12px">Isaac Odiana Studio</p>
         <h1 style="font-weight:400">Thank you</h1>
-        <p>Your order <strong>${input.orderId}</strong> totaling ${input.totalLabel} is confirmed.</p>
+        <p>Hi ${input.customerName ?? "there"},</p>
+        <p>Your order <strong>${input.orderId}</strong> totaling <strong>${input.totalLabel}</strong> is confirmed and paid.</p>
+        ${
+          lines
+            ? `<ul style="padding-left:18px;color:#d8cfc3;line-height:1.5">${lines}</ul>`
+            : ""
+        }
+        <p style="margin-top:24px;color:#8b8074">We’ll email again when the order is fulfilled / shipped.</p>
+      </div>
+    `,
+  });
+}
+
+export async function sendOrderFulfilledEmail(input: {
+  email: string;
+  orderId: string;
+  customerName?: string | null;
+  note?: string;
+}) {
+  await sendMail({
+    to: input.email,
+    subject: `Order fulfilled · ${input.orderId}`,
+    html: `
+      <div style="font-family:Georgia,serif;background:#0b0a09;color:#f2ebe1;padding:32px">
+        <p style="letter-spacing:0.2em;text-transform:uppercase;color:#c6a15b;font-size:12px">Isaac Odiana Studio</p>
+        <h1 style="font-weight:400">On its way</h1>
+        <p>Hi ${input.customerName ?? "there"},</p>
+        <p>Your order <strong>${input.orderId}</strong> is marked fulfilled.</p>
+        ${
+          input.note?.trim()
+            ? `<p style="white-space:pre-wrap;line-height:1.6">${input.note.trim()}</p>`
+            : "<p>Digital items are ready; physical editions are packed for delivery.</p>"
+        }
+        <p style="margin-top:24px;color:#8b8074">Reply to this email if you need help.</p>
       </div>
     `,
   });
@@ -143,7 +187,22 @@ export async function sendStudioReplyEmail(input: {
   name: string;
   subject: string;
   message: string;
+  meetingUrl?: string;
+  calendarUrl?: string;
+  slotLabel?: string;
 }) {
+  const extras = [
+    input.slotLabel
+      ? `<p style="margin-top:20px"><strong>Session time:</strong> ${input.slotLabel}</p>`
+      : "",
+    input.meetingUrl
+      ? `<p style="margin-top:12px"><a href="${input.meetingUrl}" style="color:#e0c48a">Join meeting</a></p>`
+      : "",
+    input.calendarUrl
+      ? `<p style="margin-top:12px"><a href="${input.calendarUrl}" style="color:#e0c48a">Add to Google Calendar</a></p>`
+      : "",
+  ].join("");
+
   await sendMail({
     to: input.to,
     subject: input.subject,
@@ -153,6 +212,7 @@ export async function sendStudioReplyEmail(input: {
         <h1 style="font-weight:400;font-size:28px">Studio reply</h1>
         <p>Hi ${input.name},</p>
         <p style="white-space:pre-wrap;line-height:1.6">${input.message}</p>
+        ${extras}
         <p style="margin-top:24px;color:#8b8074">You can reply directly to this email.</p>
       </div>
     `,

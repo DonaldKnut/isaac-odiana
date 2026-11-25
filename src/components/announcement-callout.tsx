@@ -3,62 +3,130 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Megaphone, X } from "lucide-react";
 import { useLocale } from "@/components/locale-provider";
 import { useLocalized } from "@/components/localized";
 import type { AnnouncementItem } from "@/lib/cms/types";
+import { claimSitePromo, releaseSitePromo } from "@/lib/site-promo";
 
 const SEEN_KEY = "isaac-announcement-seen";
-const INTERVAL_MS = 1000 * 60 * 4;
+const QUEUE_KEY = "isaac-announcement-queue";
+
+function announcementHref(item: AnnouncementItem) {
+  if (item.href?.trim()) return item.href.trim();
+  return "/announcements";
+}
+
+function loadSeenIds(): Set<string> {
+  if (typeof window === "undefined") return new Set<string>();
+  try {
+    const raw = localStorage.getItem(QUEUE_KEY);
+    if (!raw) {
+      const legacy = localStorage.getItem(SEEN_KEY);
+      return legacy ? new Set<string>([legacy]) : new Set<string>();
+    }
+    const parsed = JSON.parse(raw) as unknown;
+    const ids = Array.isArray(parsed)
+      ? parsed.filter((value): value is string => typeof value === "string")
+      : [];
+    return new Set<string>(ids);
+  } catch {
+    return new Set<string>();
+  }
+}
+
+function persistSeenIds(ids: Set<string>) {
+  localStorage.setItem(QUEUE_KEY, JSON.stringify([...ids]));
+}
 
 export function AnnouncementCallout({
-  item,
+  items,
 }: {
-  item: AnnouncementItem | null;
+  items: AnnouncementItem[];
 }) {
   const pathname = usePathname();
   const t = useLocalized();
   const { t: ui } = useLocale();
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [seenIds, setSeenIds] = useState<Set<string>>(() => new Set());
+
   const onBoard = pathname.startsWith("/announcements");
+  const onHome = pathname === "/";
+  const suppressed = onBoard || onHome;
+
+  const queue = useMemo(
+    () => items.filter((item) => item.published !== false),
+    [items],
+  );
+
+  const active = queue.find((item) => item.id === activeId) ?? null;
 
   useEffect(() => {
-    if (!item || onBoard) return;
-    const seen = localStorage.getItem(SEEN_KEY);
-    if (seen !== item.id) {
-      const timer = window.setTimeout(() => {
-        setOpen(true);
-        setExpanded(true);
-      }, 1800);
-      return () => window.clearTimeout(timer);
-    }
-
-    const pulse = window.setInterval(() => {
-      setOpen(true);
-      setExpanded(true);
-      window.setTimeout(() => setExpanded(false), 6500);
-    }, INTERVAL_MS);
-
-    return () => window.clearInterval(pulse);
-  }, [item, onBoard]);
+    setSeenIds(loadSeenIds());
+  }, []);
 
   useEffect(() => {
-    if (onBoard) {
+    if (suppressed || queue.length === 0) {
       setOpen(false);
       setExpanded(false);
+      setActiveId(null);
+      releaseSitePromo("announcement");
+      return;
     }
-  }, [onBoard]);
 
-  if (!item || !open || onBoard) return null;
+    const next = queue.find((item) => !seenIds.has(item.id)) ?? null;
+    if (!next) {
+      setOpen(false);
+      setExpanded(false);
+      setActiveId(null);
+      releaseSitePromo("announcement");
+      return;
+    }
+
+    let cancelled = false;
+    let retryTimer: number | undefined;
+
+    const tryShow = () => {
+      if (cancelled) return;
+      if (!claimSitePromo("announcement")) {
+        retryTimer = window.setTimeout(tryShow, 3500);
+        return;
+      }
+      setActiveId(next.id);
+      setOpen(true);
+      setExpanded(true);
+    };
+
+    const timer = window.setTimeout(tryShow, 1600);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+      if (retryTimer) window.clearTimeout(retryTimer);
+    };
+  }, [suppressed, queue, seenIds]);
 
   function dismiss() {
-    localStorage.setItem(SEEN_KEY, item!.id);
+    if (!active) return;
+    const nextSeen = new Set(seenIds);
+    nextSeen.add(active.id);
+    setSeenIds(nextSeen);
+    persistSeenIds(nextSeen);
+    localStorage.setItem(SEEN_KEY, active.id);
     setOpen(false);
     setExpanded(false);
+    setActiveId(null);
+    releaseSitePromo("announcement");
   }
+
+  if (!active || !open || suppressed) return null;
+
+  const primaryHref = announcementHref(active);
+  const showViewAll = primaryHref !== "/announcements";
 
   return (
     <AnimatePresence>
@@ -80,7 +148,7 @@ export function AnnouncementCallout({
             <div className="w-[min(92vw,22rem)]">
               <div className="relative h-28">
                 <Image
-                  src={item.image}
+                  src={active.image}
                   alt=""
                   fill
                   className="object-cover"
@@ -102,16 +170,27 @@ export function AnnouncementCallout({
                   {ui.nav.announcements}
                 </p>
                 <p className="mt-2 font-display text-xl text-parchment">
-                  {t(item.title)}
+                  {t(active.title)}
                 </p>
-                <p className="mt-1 text-sm text-smoke">{t(item.excerpt)}</p>
-                <Link
-                  href="/announcements"
-                  onClick={dismiss}
-                  className="mt-3 inline-flex text-[0.62rem] uppercase tracking-[0.16em] text-amber-bright hover:text-parchment"
-                >
-                  {ui.pages.announcements.viewAll}
-                </Link>
+                <p className="mt-1 text-sm text-smoke">{t(active.excerpt)}</p>
+                <div className="mt-3 flex flex-wrap items-center gap-3">
+                  <Link
+                    href={primaryHref}
+                    onClick={dismiss}
+                    className="inline-flex border border-amber/45 bg-amber/15 px-3 py-2 text-[0.62rem] uppercase tracking-[0.16em] text-amber-bright transition hover:bg-amber/25"
+                  >
+                    {ui.pages.announcements.open}
+                  </Link>
+                  {showViewAll ? (
+                    <Link
+                      href="/announcements"
+                      onClick={dismiss}
+                      className="inline-flex text-[0.62rem] uppercase tracking-[0.16em] text-smoke transition hover:text-parchment"
+                    >
+                      {ui.pages.announcements.viewAll}
+                    </Link>
+                  ) : null}
+                </div>
               </div>
             </div>
           ) : (
