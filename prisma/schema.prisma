@@ -1,0 +1,268 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  CUSTOMER
+}
+
+enum ProductType {
+  BOOK_PHYSICAL
+  BOOK_DIGITAL
+  MERCH
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  FULFILLED
+  CANCELLED
+  REFUNDED
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+enum RequestStatus {
+  NEW
+  CONTACTED
+  SCHEDULED
+  CLOSED
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+  AUDIO
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  role          Role      @default(CUSTOMER)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  orders        Order[]
+  bookings      Booking[]
+}
+
+model Product {
+  id            String      @id @default(cuid())
+  slug          String      @unique
+  title         String
+  titleFr       String?
+  description   String
+  descriptionFr String?
+  type          ProductType
+  priceCents    Int
+  currency      String      @default("EUR")
+  coverUrl      String?
+  /// JSON string array of image URLs (gallery / slider)
+  images        Json?
+  stock         Int?
+  digitalUrl    String?
+  variants      Json?
+  published     Boolean     @default(false)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  orderItems    OrderItem[]
+}
+
+model PodcastEpisode {
+  id            String   @id @default(cuid())
+  slug          String   @unique
+  title         String
+  titleFr       String?
+  description   String
+  descriptionFr String?
+  audioUrl      String
+  coverUrl      String?
+  durationSec   Int?
+  category      String?
+  categoryFr    String?
+  published     Boolean  @default(false)
+  publishedAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model TutoringSession {
+  id            String    @id @default(cuid())
+  slug          String    @unique
+  title         String
+  titleFr       String?
+  description   String
+  descriptionFr String?
+  priceCents    Int
+  currency      String    @default("EUR")
+  durationMin   Int       @default(60)
+  meetingType   String    @default("ZOOM")
+  published     Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  slots         AvailabilitySlot[]
+  bookings      Booking[]
+}
+
+model AvailabilitySlot {
+  id        String          @id @default(cuid())
+  sessionId String
+  session   TutoringSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  startsAt  DateTime
+  endsAt    DateTime
+  isBooked  Boolean         @default(false)
+  booking   Booking?
+  createdAt DateTime        @default(now())
+
+  @@index([sessionId, startsAt])
+}
+
+model Booking {
+  id              String          @id @default(cuid())
+  sessionId       String
+  session         TutoringSession @relation(fields: [sessionId], references: [id])
+  slotId          String          @unique
+  slot            AvailabilitySlot @relation(fields: [slotId], references: [id])
+  userId          String?
+  user            User?           @relation(fields: [userId], references: [id])
+  guestName       String
+  guestEmail      String
+  status          BookingStatus   @default(PENDING)
+  stripeSessionId String?
+  meetingUrl      String?
+  notes           String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([guestEmail])
+  @@index([status])
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  userId          String?
+  user            User?       @relation(fields: [userId], references: [id])
+  email           String
+  status          OrderStatus @default(PENDING)
+  totalCents      Int
+  currency        String      @default("EUR")
+  stripeSessionId String?
+  shippingName    String?
+  shippingAddress Json?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  items           OrderItem[]
+
+  @@index([email])
+  @@index([status])
+}
+
+model OrderItem {
+  id         String  @id @default(cuid())
+  orderId    String
+  order      Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId  String
+  product    Product @relation(fields: [productId], references: [id])
+  quantity   Int
+  unitCents  Int
+  title      String
+}
+
+model PortfolioItem {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  title       String
+  description String?
+  mediaType   MediaType
+  mediaUrl    String
+  coverUrl    String?
+  sortOrder   Int       @default(0)
+  published   Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Event {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  description String?
+  location    String?
+  startsAt    DateTime
+  endsAt      DateTime?
+  coverUrl    String?
+  published   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SiteContent {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     Json
+  updatedAt DateTime @updatedAt
+}
+
+model MentorshipRequest {
+  id             String        @id @default(cuid())
+  name           String
+  email          String
+  topic          String?
+  preferredTimes String?
+  message        String
+  status         RequestStatus @default(NEW)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([email])
+  @@index([status])
+}
+
+model NewsletterSubscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  source    String   @default("popup")
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum NotificationKind {
+  ORDER
+  BOOKING
+  NEWSLETTER
+  ENQUIRY
+  SYSTEM
+}
+
+model AdminNotification {
+  id        String           @id @default(cuid())
+  kind      NotificationKind
+  title     String
+  body      String
+  href      String?
+  meta      Json?
+  read      Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  @@index([read, createdAt])
+  @@index([kind])
+}
+
+model StripeEvent {
+  id          String   @id // Stripe event id (evt_...)
+  type        String
+  processedAt DateTime @default(now())
+}

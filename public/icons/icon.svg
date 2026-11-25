@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Isaac Odiana">
+  <rect width="512" height="512" fill="#0b0a09"/>
+  <circle cx="256" cy="256" r="168" fill="none" stroke="#c6a15b" stroke-width="14"/>
+  <path d="M210 320c0 22-16 40-36 40s-36-18-36-40 16-40 36-40c6 0 12 1 17 4V168l148-32v156c0 22-16 40-36 40s-36-18-36-40 16-40 36-40c6 0 12 1 17 4" fill="none" stroke="#e0c48a" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

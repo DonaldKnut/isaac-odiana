@@ -1,0 +1,24 @@
+{
+  "name": "Isaac Odiana Studio",
+  "short_name": "Isaac Odiana",
+  "description": "Music, books, podcasts, merch and private tutoring.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b0a09",
+  "theme_color": "#0b0a09",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://res.cloudinary.com/duhpqf0ax/image/upload/v1795558047/Metallic_Gold_IO_Monogram_Logo_uj6bha.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://res.cloudinary.com/duhpqf0ax/image/upload/v1795558047/Metallic_Gold_IO_Monogram_Logo_uj6bha.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
