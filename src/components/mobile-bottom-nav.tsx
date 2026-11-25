@@ -4,8 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import {
-  CalendarHeart,
   Home,
+  LayoutDashboard,
+  LogIn,
   ShoppingBag,
   type LucideIcon,
 } from "lucide-react";
@@ -83,7 +84,7 @@ function NavGlyph({
   );
 }
 
-export function MobileBottomNav() {
+export function MobileBottomNav({ isAdmin = false }: { isAdmin?: boolean }) {
   const pathname = usePathname();
   const { count, openDrawer } = useCart();
   const { t } = useLocale();
@@ -94,8 +95,8 @@ export function MobileBottomNav() {
     pathname.startsWith("/books/") ||
     pathname.startsWith("/products/");
   const onMusic = pathname === "/music" || pathname.startsWith("/music/");
-  const onTutoring =
-    pathname === "/tutoring" || pathname.startsWith("/tutoring/");
+  const onLogin =
+    pathname.startsWith("/admin/login") || pathname.startsWith("/admin");
 
   const left = [
     {
@@ -122,13 +123,23 @@ export function MobileBottomNav() {
       icon: siteNavIcons.music,
       active: onMusic,
     },
-    {
-      key: "tutoring",
-      href: "/tutoring",
-      label: t.nav.tutoring,
-      icon: CalendarHeart,
-      active: onTutoring,
-    },
+    isAdmin
+      ? {
+          key: "admin",
+          href: "/admin",
+          label: t.nav.admin,
+          icon: LayoutDashboard,
+          active:
+            pathname.startsWith("/admin") &&
+            !pathname.startsWith("/admin/login"),
+        }
+      : {
+          key: "login",
+          href: "/admin/login",
+          label: t.nav.login,
+          icon: LogIn,
+          active: onLogin,
+        },
   ] as const;
 
   return (

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard } from "lucide-react";
+import { LayoutDashboard, Megaphone } from "lucide-react";
 import { adminNavIcons } from "@/components/illustrations";
 import { useLocale } from "@/components/locale-provider";
 import { cn } from "@/lib/utils";
@@ -31,16 +31,16 @@ export function AdminBottomNav() {
       match: (path: string) => path.startsWith("/admin/orders"),
     },
     {
-      href: "/admin/content",
-      label: t.admin.nav.content,
-      icon: adminNavIcons.content,
-      match: (path: string) => path.startsWith("/admin/content"),
+      href: "/admin/products",
+      label: t.admin.nav.products,
+      icon: adminNavIcons.products,
+      match: (path: string) => path.startsWith("/admin/products"),
     },
     {
-      href: "/admin/sessions",
-      label: t.admin.nav.sessions,
-      icon: adminNavIcons.sessions,
-      match: (path: string) => path.startsWith("/admin/sessions"),
+      href: "/admin/announcements",
+      label: t.admin.nav.announcements,
+      icon: Megaphone,
+      match: (path: string) => path.startsWith("/admin/announcements"),
     },
   ] as const;
 

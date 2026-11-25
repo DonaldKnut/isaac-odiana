@@ -5,12 +5,14 @@ import { requireAdmin } from "@/lib/admin-auth";
 import {
   ensureCmsDefaults,
   getHomepageContent,
+  saveAnnouncementsContent,
   saveHomepageContent,
   saveMusicPageContent,
   saveMusicWorksContent,
   saveSiteSettings,
 } from "@/lib/cms/content";
 import type {
+  AnnouncementsBundle,
   HomepageBundle,
   MusicPageContent,
   MusicWorkContent,
@@ -37,7 +39,9 @@ export async function seedCmsDefaultsAction(): Promise<CmsActionState> {
   await ensureCmsDefaults();
   revalidatePath("/");
   revalidatePath("/music");
+  revalidatePath("/announcements");
   revalidatePath("/admin/content");
+  revalidatePath("/admin/announcements");
   return { ok: true, message: t.messages.defaultsSeeded };
 }
 
@@ -114,6 +118,26 @@ export async function saveMusicPageAction(
     return { ok: true, message: t.messages.musicSaved };
   } catch {
     return { ok: false, message: t.messages.musicSaveFailed };
+  }
+}
+
+export async function saveAnnouncementsAction(
+  _prev: CmsActionState,
+  formData: FormData,
+): Promise<CmsActionState> {
+  await requireAdmin();
+  const t = await tServer();
+  try {
+    const raw = String(formData.get("payload") || "");
+    const value = JSON.parse(raw) as AnnouncementsBundle;
+    await saveAnnouncementsContent(value);
+    revalidatePath("/");
+    revalidatePath("/announcements");
+    revalidatePath("/admin/announcements");
+    revalidatePath("/admin/content");
+    return { ok: true, message: t.messages.announcementsSaved };
+  } catch {
+    return { ok: false, message: t.messages.announcementsSaveFailed };
   }
 }
 

@@ -1,9 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { CalendarHeart, LayoutDashboard, ShoppingBag } from "lucide-react";
+import {
+  CalendarHeart,
+  ChevronDown,
+  LayoutDashboard,
+  LogIn,
+  Megaphone,
+  ShoppingBag,
+  Sparkles,
+} from "lucide-react";
 import { BookCtaModal } from "@/components/book-cta-modal";
 import { BrandLogo } from "@/components/brand-logo";
 import { useCart } from "@/components/cart-provider";
@@ -19,17 +27,27 @@ export function SiteHeader({ adminOffset = false }: { adminOffset?: boolean }) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [bookOpen, setBookOpen] = useState(false);
+  const [megaOpen, setMegaOpen] = useState(false);
   const [cartReady, setCartReady] = useState(false);
+  const megaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setCartReady(true);
   }, []);
 
   const links = [
+    { href: "/music", label: t.nav.music },
+    { href: "/books", label: t.nav.books },
+    { href: "/podcast", label: t.nav.podcast },
+    { href: "/shop", label: t.nav.shop },
+  ];
+
+  const mobileLinks = [
     { href: "/music", label: t.nav.music, icon: siteNavIcons.music },
     { href: "/books", label: t.nav.books, icon: siteNavIcons.books },
     { href: "/podcast", label: t.nav.podcast, icon: siteNavIcons.podcast },
     { href: "/shop", label: t.nav.shop, icon: siteNavIcons.shop },
+    { href: "/announcements", label: t.nav.announcements, icon: Megaphone },
     { href: "/tutoring", label: t.nav.tutoring, icon: siteNavIcons.tutoring },
   ];
 
@@ -47,8 +65,26 @@ export function SiteHeader({ adminOffset = false }: { adminOffset?: boolean }) {
     };
   }, [menuOpen]);
 
+  useEffect(() => {
+    function onPointerDown(event: MouseEvent) {
+      if (!megaRef.current?.contains(event.target as Node)) {
+        setMegaOpen(false);
+      }
+    }
+    function onKey(event: KeyboardEvent) {
+      if (event.key === "Escape") setMegaOpen(false);
+    }
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, []);
+
   function openBook() {
     setMenuOpen(false);
+    setMegaOpen(false);
     setBookOpen(true);
   }
 
@@ -60,7 +96,7 @@ export function SiteHeader({ adminOffset = false }: { adminOffset?: boolean }) {
         className={cn(
           "fixed inset-x-0 z-50 transition-all duration-500",
           adminOffset ? "top-10" : "top-0",
-          scrolled || menuOpen
+          scrolled || menuOpen || megaOpen
             ? "border-b border-line bg-ink/90 py-0 shadow-[0_10px_40px_rgba(0,0,0,0.35)] backdrop-blur-md"
             : "bg-transparent",
         )}
@@ -70,23 +106,104 @@ export function SiteHeader({ adminOffset = false }: { adminOffset?: boolean }) {
             size="lg"
             priority
             className="min-w-0"
-            onClick={() => setMenuOpen(false)}
+            onClick={() => {
+              setMenuOpen(false);
+              setMegaOpen(false);
+            }}
           />
 
           <nav className="hidden items-center gap-7 lg:flex">
-            {links.map((link) => {
-              const Icon = link.icon;
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="site-link inline-flex items-center gap-2 text-[0.7rem] font-medium uppercase tracking-[0.22em] text-sand/80 transition-colors hover:text-parchment"
-                >
-                  <Icon className="h-3.5 w-3.5 text-brass/80" strokeWidth={1.6} />
-                  {link.label}
-                </Link>
-              );
-            })}
+            {links.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="site-link text-[0.7rem] font-medium uppercase tracking-[0.22em] text-sand/80 transition-colors hover:text-parchment"
+              >
+                {link.label}
+              </Link>
+            ))}
+
+            <div ref={megaRef} className="relative">
+              <button
+                type="button"
+                onClick={() => setMegaOpen((value) => !value)}
+                aria-expanded={megaOpen}
+                aria-haspopup="true"
+                className={cn(
+                  "inline-flex cursor-pointer items-center gap-1.5 text-[0.7rem] font-medium uppercase tracking-[0.22em] transition-colors",
+                  megaOpen
+                    ? "text-amber-bright"
+                    : "text-sand/80 hover:text-parchment",
+                )}
+              >
+                {t.nav.studio}
+                <ChevronDown
+                  className={cn(
+                    "h-3.5 w-3.5 transition-transform duration-300",
+                    megaOpen && "rotate-180",
+                  )}
+                  strokeWidth={1.6}
+                />
+              </button>
+
+              <AnimatePresence>
+                {megaOpen ? (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 8 }}
+                    transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                    className="absolute left-1/2 top-full z-50 mt-5 w-[min(92vw,34rem)] -translate-x-1/2 border border-line bg-ink/98 p-5 shadow-[0_30px_80px_rgba(0,0,0,0.45)] backdrop-blur-xl"
+                  >
+                    <p className="text-[0.6rem] uppercase tracking-[0.22em] text-amber">
+                      {t.nav.studio}
+                    </p>
+                    <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                      <Link
+                        href="/announcements"
+                        onClick={() => setMegaOpen(false)}
+                        className="group border border-line bg-ink-soft/50 p-4 transition hover:border-amber/40"
+                      >
+                        <Megaphone
+                          className="h-4 w-4 text-amber"
+                          strokeWidth={1.6}
+                        />
+                        <p className="mt-3 font-display text-xl text-parchment group-hover:text-amber-bright">
+                          {t.nav.announcements}
+                        </p>
+                        <p className="mt-2 text-sm leading-relaxed text-smoke">
+                          {t.pages.announcements.description}
+                        </p>
+                      </Link>
+                      <Link
+                        href="/tutoring"
+                        onClick={() => setMegaOpen(false)}
+                        className="group border border-line bg-ink-soft/50 p-4 transition hover:border-amber/40"
+                      >
+                        <Sparkles
+                          className="h-4 w-4 text-amber"
+                          strokeWidth={1.6}
+                        />
+                        <p className="mt-3 font-display text-xl text-parchment group-hover:text-amber-bright">
+                          {t.nav.tutoring}
+                        </p>
+                        <p className="mt-2 text-sm leading-relaxed text-smoke">
+                          {t.pages.tutoring.description}
+                        </p>
+                      </Link>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={openBook}
+                      className="mt-4 inline-flex cursor-pointer items-center gap-2 border border-amber/40 px-4 py-2.5 text-[0.65rem] uppercase tracking-[0.18em] text-amber-bright transition hover:bg-amber/10"
+                    >
+                      <CalendarHeart className="h-3.5 w-3.5" strokeWidth={1.6} />
+                      {t.nav.bookSession}
+                    </button>
+                  </motion.div>
+                ) : null}
+              </AnimatePresence>
+            </div>
           </nav>
 
           <div className="flex shrink-0 items-center gap-1.5 min-[360px]:gap-2 sm:gap-3">
@@ -104,6 +221,7 @@ export function SiteHeader({ adminOffset = false }: { adminOffset?: boolean }) {
               type="button"
               onClick={() => {
                 setMenuOpen(false);
+                setMegaOpen(false);
                 openDrawer();
               }}
               className="hidden cursor-pointer items-center gap-1.5 text-[0.65rem] font-medium uppercase tracking-[0.2em] text-sand/90 transition hover:text-parchment md:inline-flex"
@@ -176,7 +294,7 @@ export function SiteHeader({ adminOffset = false }: { adminOffset?: boolean }) {
               <div className="mb-4">
                 <LanguageSwitcher />
               </div>
-              {links.map((link, index) => {
+              {mobileLinks.map((link, index) => {
                 const Icon = link.icon;
                 return (
                   <motion.div
@@ -190,7 +308,10 @@ export function SiteHeader({ adminOffset = false }: { adminOffset?: boolean }) {
                       onClick={() => setMenuOpen(false)}
                       className="flex items-center gap-3 border-b border-line py-3.5 font-display text-2xl text-parchment min-[360px]:py-4 min-[360px]:text-3xl"
                     >
-                      <Icon className="h-5 w-5 shrink-0 text-amber" strokeWidth={1.5} />
+                      <Icon
+                        className="h-5 w-5 shrink-0 text-amber"
+                        strokeWidth={1.5}
+                      />
                       {link.label}
                     </Link>
                   </motion.div>
@@ -216,9 +337,10 @@ export function SiteHeader({ adminOffset = false }: { adminOffset?: boolean }) {
                 <Link
                   href="/admin/login"
                   onClick={() => setMenuOpen(false)}
-                  className="mt-4 inline-flex w-fit text-[0.65rem] uppercase tracking-[0.2em] text-sand/70 transition hover:text-amber-bright"
+                  className="mt-4 inline-flex w-fit items-center gap-2 text-[0.65rem] uppercase tracking-[0.2em] text-sand/70 transition hover:text-amber-bright"
                 >
-                  {t.nav.admin}
+                  <LogIn className="h-3.5 w-3.5" strokeWidth={1.6} />
+                  {t.nav.login}
                 </Link>
               )}
             </nav>
@@ -226,7 +348,9 @@ export function SiteHeader({ adminOffset = false }: { adminOffset?: boolean }) {
         ) : null}
       </AnimatePresence>
 
-      {!hideBottomNav ? <MobileBottomNav /> : null}
+      {!hideBottomNav ? (
+        <MobileBottomNav isAdmin={adminOffset} />
+      ) : null}
       <BookCtaModal open={bookOpen} onClose={() => setBookOpen(false)} />
     </>
   );

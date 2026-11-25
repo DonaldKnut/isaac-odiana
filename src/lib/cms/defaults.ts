@@ -1,5 +1,6 @@
-import { studioMedia } from "@/lib/media";
+import { demoSamples, studioMedia } from "@/lib/media";
 import type {
+  AnnouncementsBundle,
   HomepageBundle,
   MusicPageContent,
   MusicWorkContent,
@@ -168,6 +169,18 @@ export const defaultHomepage: HomepageBundle = {
       },
     ],
   },
+  studioFeed: {
+    eyebrow: L("On set", "Sur le tournage"),
+    title: L(
+      "Snippets from the room.",
+      "Extraits depuis la salle.",
+    ),
+    body: L(
+      "Video cuts and Instagram moments — uploaded from the studio and shown here first.",
+      "Coupes vidéo et moments Instagram — publiés depuis le studio et visibles ici d’abord.",
+    ),
+    items: [],
+  },
   faq: {
     eyebrow: L("FAQ", "FAQ"),
     title: L(
@@ -255,6 +268,31 @@ export const defaultMusicWorks: MusicWorkContent[] = [
       L("Jazz-forward colour", "Couleur jazz affirmée"),
       L("Ideal entry point for new listeners", "Parfait point d’entrée"),
     ],
+    sampleAudioUrl: demoSamples.midnight,
+    platformLinks: [
+      {
+        label: "Spotify",
+        url: "https://open.spotify.com/search/Midnight%20Standards%20Isaac%20Odiana",
+      },
+      {
+        label: "Apple Music",
+        url: "https://music.apple.com/search?term=Midnight%20Standards%20Isaac%20Odiana",
+      },
+      {
+        label: "YouTube",
+        url: "https://www.youtube.com/results?search_query=Midnight+Standards+Isaac+Odiana",
+      },
+    ],
+    tracks: [
+      {
+        title: "Midnight Standards",
+        sampleAudioUrl: demoSamples.midnight,
+      },
+      {
+        title: "Afterglow Cut",
+        sampleAudioUrl: demoSamples.brass,
+      },
+    ],
   },
   {
     id: "brass-after-dark",
@@ -275,6 +313,23 @@ export const defaultMusicWorks: MusicWorkContent[] = [
       L("Extended improvisational passages", "Passages improvisés étendus"),
       L("High-energy closer material", "Matériau de clôture intense"),
     ],
+    sampleAudioUrl: demoSamples.brass,
+    platformLinks: [
+      {
+        label: "Spotify",
+        url: "https://open.spotify.com/search/Brass%20After%20Dark%20Isaac%20Odiana",
+      },
+      {
+        label: "YouTube",
+        url: "https://www.youtube.com/results?search_query=Brass+After+Dark+Isaac+Odiana",
+      },
+    ],
+    tracks: [
+      {
+        title: "Brass After Dark — live cut",
+        sampleAudioUrl: demoSamples.brass,
+      },
+    ],
   },
   {
     id: "pocket-studies",
@@ -294,6 +349,23 @@ export const defaultMusicWorks: MusicWorkContent[] = [
       L("Rhythm-led sketches", "Esquisses rythmiques"),
       L("Arrangement lessons in feel", "Leçons d’arrangement et de feel"),
       L("Bridge between beats and jazz", "Pont entre beats et jazz"),
+    ],
+    sampleAudioUrl: demoSamples.beats,
+    platformLinks: [
+      {
+        label: "Spotify",
+        url: "https://open.spotify.com/search/Pocket%20Studies%20Isaac%20Odiana",
+      },
+      {
+        label: "YouTube",
+        url: "https://www.youtube.com/results?search_query=Pocket+Studies+Isaac+Odiana",
+      },
+    ],
+    tracks: [
+      {
+        title: "Pocket Studies — sketch A",
+        sampleAudioUrl: demoSamples.beats,
+      },
     ],
   },
   {
@@ -358,3 +430,66 @@ export const defaultMusicWorks: MusicWorkContent[] = [
     ],
   },
 ];
+
+export const defaultAnnouncements: AnnouncementsBundle = {
+  eyebrow: L("Studio board", "Tableau du studio"),
+  title: L("Announcements", "Annonces"),
+  body: L(
+    "Upcoming episodes, song drops, mixtapes and new releases from the studio.",
+    "Épisodes à venir, sorties, mixtapes et nouveautés du studio.",
+  ),
+  items: [
+    {
+      id: "ann-midnight-standards",
+      kind: "mixtape",
+      title: L("Midnight Standards mixtape", "Mixtape Midnight Standards"),
+      excerpt: L(
+        "A late-night selection of jazz phrasing and beat architecture.",
+        "Une sélection nocturne de phrasé jazz et d’architecture de beats.",
+      ),
+      body: L(
+        "The Midnight Standards mixtape is live — stream it from the music room and catch the visuals in the gallery.",
+        "La mixtape Midnight Standards est en ligne — écoutez-la dans le salon musique et retrouvez les visuels en galerie.",
+      ),
+      image: studioMedia.vinyl,
+      href: "/music",
+      published: true,
+      pinned: true,
+      publishedAt: new Date().toISOString(),
+    },
+    {
+      id: "ann-podcast-drop",
+      kind: "episode",
+      title: L("New podcast episode soon", "Nouvel épisode podcast bientôt"),
+      excerpt: L(
+        "Archive notes on process, restarting, and keeping a practice alive.",
+        "Notes d’archive sur le processus, les redémarrages et la pratique.",
+      ),
+      body: L(
+        "A new conversation lands in the podcast archive shortly. Follow the studio board for the exact drop time.",
+        "Une nouvelle conversation arrive bientôt dans l’archive podcast. Suivez le tableau du studio pour l’horaire exact.",
+      ),
+      image: studioMedia.mic,
+      href: "/podcast",
+      published: true,
+      publishedAt: new Date().toISOString(),
+    },
+    {
+      id: "ann-letters-drop",
+      kind: "drop",
+      title: L("Letters from the Studio — restock", "Letters from the Studio — réassort"),
+      excerpt: L(
+        "Physical editions are back on the shelf.",
+        "Les éditions physiques sont de retour.",
+      ),
+      body: L(
+        "A limited restock of Letters from the Studio is available in the bookstore while stock lasts.",
+        "Un réassort limité de Letters from the Studio est disponible en librairie tant que le stock dure.",
+      ),
+      image: studioMedia.writing,
+      href: "/books",
+      published: true,
+      publishedAt: new Date().toISOString(),
+    },
+  ],
+};

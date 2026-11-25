@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { Megaphone, type LucideIcon } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
 import { siteNavIcons } from "@/components/illustrations";
 import { useLocale } from "@/components/locale-provider";
@@ -13,11 +14,12 @@ export function SiteFooter({ settings }: { settings: SiteSettings }) {
   const { t } = useLocale();
   const localize = useLocalized();
 
-  const links = [
+  const links: Array<{ href: string; label: string; icon: LucideIcon }> = [
     { href: "/music", label: t.nav.music, icon: siteNavIcons.music },
     { href: "/books", label: t.nav.books, icon: siteNavIcons.books },
     { href: "/podcast", label: t.nav.podcast, icon: siteNavIcons.podcast },
     { href: "/shop", label: t.nav.shop, icon: siteNavIcons.shop },
+    { href: "/announcements", label: t.nav.announcements, icon: Megaphone },
     { href: "/tutoring", label: t.nav.tutoring, icon: siteNavIcons.tutoring },
   ];
 

@@ -6,6 +6,7 @@ import {
   Bell,
   LayoutDashboard,
   LogOut,
+  Megaphone,
   Package,
   PenLine,
 } from "lucide-react";
@@ -49,6 +50,15 @@ export function AdminPresenceBar({
             >
               <PenLine className="h-3.5 w-3.5" strokeWidth={1.6} />
               <span className="hidden md:inline">{t.admin.nav.content}</span>
+            </Link>
+            <Link
+              href="/admin/announcements"
+              className="inline-flex items-center gap-1.5 px-2 py-1.5 text-[0.6rem] uppercase tracking-[0.14em] text-sand transition hover:text-amber-bright"
+            >
+              <Megaphone className="h-3.5 w-3.5" strokeWidth={1.6} />
+              <span className="hidden md:inline">
+                {t.admin.nav.announcements}
+              </span>
             </Link>
             <Link
               href="/admin/products"

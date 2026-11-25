@@ -70,6 +70,16 @@ export type HomeFaqContent = {
   }>;
 };
 
+export type MusicPlatformLink = {
+  label: string;
+  url: string;
+};
+
+export type MusicTrackSample = {
+  title: string;
+  sampleAudioUrl?: string;
+};
+
 export type MusicWorkContent = {
   id: string;
   title: string;
@@ -78,11 +88,36 @@ export type MusicWorkContent = {
   image: string;
   /** Modal gallery; falls back to `[image]` when empty. */
   images?: string[];
+  /** Short preview visitors can play on-site. */
+  sampleAudioUrl?: string;
+  /** Spotify, Apple Music, YouTube, Bandcamp, etc. */
+  platformLinks?: MusicPlatformLink[];
+  /** Optional track list with per-track samples. */
+  tracks?: MusicTrackSample[];
   span?: string;
   year: string;
   emphasis: LocalizedString;
   description: LocalizedString;
   highlights: LocalizedString[];
+};
+
+export type HomeReelItem = {
+  id: string;
+  kind: "video" | "instagram";
+  title: LocalizedString;
+  /** Uploaded video URL or still/poster image. */
+  mediaUrl: string;
+  posterUrl?: string;
+  /** Instagram / external post URL. */
+  externalUrl?: string;
+  published: boolean;
+};
+
+export type HomeStudioFeedContent = {
+  eyebrow: LocalizedString;
+  title: LocalizedString;
+  body: LocalizedString;
+  items: HomeReelItem[];
 };
 
 export type SiteSettings = {
@@ -104,5 +139,33 @@ export type HomepageBundle = {
   featured: HomeFeaturedContent;
   about: HomeAboutContent;
   world: HomeWorldContent;
+  studioFeed: HomeStudioFeedContent;
   faq: HomeFaqContent;
+};
+
+export type AnnouncementKind =
+  | "episode"
+  | "song"
+  | "drop"
+  | "mixtape"
+  | "general";
+
+export type AnnouncementItem = {
+  id: string;
+  kind: AnnouncementKind;
+  title: LocalizedString;
+  excerpt: LocalizedString;
+  body: LocalizedString;
+  image: string;
+  href?: string;
+  published: boolean;
+  pinned?: boolean;
+  publishedAt: string;
+};
+
+export type AnnouncementsBundle = {
+  eyebrow: LocalizedString;
+  title: LocalizedString;
+  body: LocalizedString;
+  items: AnnouncementItem[];
 };

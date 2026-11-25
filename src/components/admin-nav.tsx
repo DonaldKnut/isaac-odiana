@@ -8,6 +8,7 @@ import {
   Bell,
   Home,
   LogOut,
+  Megaphone,
   PanelLeftClose,
   PanelLeftOpen,
 } from "lucide-react";
@@ -24,10 +25,14 @@ export function AdminNav({
   email,
   unread = 0,
   notifications = [],
+  docked = true,
+  onToggleDock,
 }: {
   email?: string;
   unread?: number;
   notifications?: AdminNotificationItemData[];
+  docked?: boolean;
+  onToggleDock?: () => void;
 }) {
   const { t } = useLocale();
   const pathname = usePathname();
@@ -37,6 +42,11 @@ export function AdminNav({
   const items = [
     { href: "/admin", label: t.admin.nav.overview, icon: adminNavIcons.overview },
     { href: "/admin/content", label: t.admin.nav.content, icon: adminNavIcons.content },
+    {
+      href: "/admin/announcements",
+      label: t.admin.nav.announcements,
+      icon: Megaphone,
+    },
     { href: "/admin/products", label: t.admin.nav.products, icon: adminNavIcons.products },
     { href: "/admin/podcast", label: t.admin.nav.podcast, icon: adminNavIcons.podcast },
     { href: "/admin/sessions", label: t.admin.nav.sessions, icon: adminNavIcons.sessions },
@@ -67,7 +77,12 @@ export function AdminNav({
   return (
     <>
       <header className="fixed inset-x-0 top-0 z-50 border-b border-line/80 bg-ink/95 backdrop-blur-xl">
-        <div className="flex h-14 items-center justify-between gap-2 px-3 min-[360px]:h-16 min-[360px]:gap-3 min-[360px]:px-5 md:px-6 lg:pl-[17.5rem]">
+        <div
+          className={cn(
+            "flex h-14 items-center justify-between gap-2 px-3 transition-[padding] duration-300 min-[360px]:h-16 min-[360px]:gap-3 min-[360px]:px-5 md:px-6",
+            docked ? "lg:pl-[17.5rem]" : "lg:pl-[5.75rem]",
+          )}
+        >
           <div className="flex min-w-0 items-center gap-2.5 min-[360px]:gap-3">
             <button
               type="button"
@@ -82,17 +97,33 @@ export function AdminNav({
                 <PanelLeftOpen className="h-4 w-4" strokeWidth={1.6} />
               )}
             </button>
-            {/* Mobile: page title only — logo + language live in the sidebar */}
+            <button
+              type="button"
+              onClick={onToggleDock}
+              className="hidden h-10 w-10 shrink-0 cursor-pointer items-center justify-center border border-line text-parchment transition hover:border-amber/50 hover:text-amber-bright lg:inline-flex"
+              aria-label={docked ? "Collapse sidebar" : "Expand sidebar"}
+            >
+              {docked ? (
+                <PanelLeftClose className="h-4 w-4" strokeWidth={1.6} />
+              ) : (
+                <PanelLeftOpen className="h-4 w-4" strokeWidth={1.6} />
+              )}
+            </button>
+
+            <div className="hidden min-w-0 items-center gap-4 lg:flex">
+              <BrandLogo size="sm" href="/admin" />
+              <div className="min-w-0 border-l border-line pl-4">
+                <p className="text-[0.6rem] uppercase tracking-[0.22em] text-amber">
+                  Studio control
+                </p>
+                <p className="truncate font-display text-xl text-parchment">
+                  {activeItem.label}
+                </p>
+              </div>
+            </div>
+
             <div className="min-w-0 lg:hidden">
               <p className="truncate font-display text-lg text-parchment min-[360px]:text-xl">
-                {activeItem.label}
-              </p>
-            </div>
-            <div className="hidden min-w-0 lg:block">
-              <p className="text-[0.6rem] uppercase tracking-[0.22em] text-amber">
-                Studio control
-              </p>
-              <p className="truncate font-display text-xl text-parchment">
                 {activeItem.label}
               </p>
             </div>
@@ -158,17 +189,34 @@ export function AdminNav({
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-[16.5rem] flex-col border-r border-line bg-ink-soft transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] lg:translate-x-0 lg:z-40",
+          "fixed inset-y-0 left-0 z-50 flex flex-col border-r border-line bg-ink-soft transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] lg:z-40 lg:translate-x-0",
+          docked ? "lg:w-[16.5rem]" : "lg:w-[4.75rem]",
+          "w-[16.5rem]",
           sidebarOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
-        <div className="border-b border-line px-6 py-6">
-          <BrandLogo size="sm" href="/admin" />
-          <p className="mt-4 text-[0.65rem] uppercase tracking-[0.28em] text-amber">
-            Admin
-          </p>
-          {email ? (
-            <p className="mt-3 truncate text-xs text-smoke">{email}</p>
+        <div
+          className={cn(
+            "border-b border-line",
+            docked ? "px-6 py-6" : "px-3 py-5",
+          )}
+        >
+          <div className={cn(!docked && "lg:flex lg:justify-center")}>
+            <BrandLogo
+              size="sm"
+              href="/admin"
+              className={cn(!docked && "lg:max-w-[2.75rem]")}
+            />
+          </div>
+          {docked ? (
+            <>
+              <p className="mt-4 text-[0.65rem] uppercase tracking-[0.28em] text-amber">
+                Admin
+              </p>
+              {email ? (
+                <p className="mt-3 truncate text-xs text-smoke">{email}</p>
+              ) : null}
+            </>
           ) : null}
           <div className="mt-5 space-y-3 lg:hidden">
             <LanguageSwitcher />
@@ -194,9 +242,11 @@ export function AdminNav({
               <Link
                 key={item.href}
                 href={item.href}
+                title={item.label}
                 onClick={() => setSidebarOpen(false)}
                 className={cn(
                   "group flex items-center gap-3 px-3 py-2.5 text-sm transition",
+                  !docked && "lg:justify-center lg:px-2",
                   active
                     ? "border border-amber/35 bg-ink text-parchment"
                     : "border border-transparent text-sand/80 hover:border-line hover:bg-ink/60 hover:text-parchment",
@@ -204,7 +254,7 @@ export function AdminNav({
               >
                 <span
                   className={cn(
-                    "inline-flex h-9 w-9 items-center justify-center border transition",
+                    "inline-flex h-9 w-9 shrink-0 items-center justify-center border transition",
                     active
                       ? "border-amber/45 bg-amber/10 text-amber-bright"
                       : "border-line bg-ink/40 text-brass/80 group-hover:border-amber/30 group-hover:text-amber-bright",
@@ -212,17 +262,19 @@ export function AdminNav({
                 >
                   <Icon className="h-4 w-4" strokeWidth={1.6} />
                 </span>
-                {item.label}
+                <span className={cn(!docked && "lg:hidden")}>{item.label}</span>
               </Link>
             );
           })}
         </nav>
 
-        <div className="border-t border-line px-6 py-5">
-          <p className="text-[0.6rem] uppercase tracking-[0.2em] text-smoke">
-            Guest commerce · no signup
-          </p>
-        </div>
+        {docked ? (
+          <div className="border-t border-line px-6 py-5">
+            <p className="text-[0.6rem] uppercase tracking-[0.2em] text-smoke">
+              Guest commerce · no signup
+            </p>
+          </div>
+        ) : null}
       </aside>
 
       <AdminNotificationsModal

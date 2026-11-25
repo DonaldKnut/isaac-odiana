@@ -33,11 +33,12 @@ export default async function AdminPage() {
   ] as const;
 
   const checklist = [
-    { done: true, label: "Products create / publish / delete" },
+    { done: true, label: "Products create / edit / publish / delete" },
+    { done: true, label: "Announcements board + homepage callout" },
     { done: true, label: "Multi-image gallery + uploader UI" },
     { done: true, label: "Podcast episode composer" },
     { done: true, label: "Tutoring sessions + slot manager" },
-    { done: true, label: "Bookings + mentorship request inbox" },
+    { done: true, label: "Bookings + mentorship reply inbox" },
     { done: true, label: "Orders table" },
     { done: true, label: "Stripe webhook endpoint (/api/stripe/webhook)" },
     { done: isMailConfigured(), label: "Resend email keys" },

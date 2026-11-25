@@ -55,6 +55,22 @@ export function MediaUploader({
         if (imagesOnly && !file.type.startsWith("image/")) {
           throw new Error(`${file.name} is not an image.`);
         }
+        if (
+          accept.includes("audio/") &&
+          !accept.includes("image/") &&
+          !accept.includes("video/") &&
+          !file.type.startsWith("audio/")
+        ) {
+          throw new Error(`${file.name} is not an audio file.`);
+        }
+        if (
+          accept.includes("video/") &&
+          !accept.includes("image/") &&
+          !file.type.startsWith("video/") &&
+          !file.type.startsWith("image/")
+        ) {
+          throw new Error(`${file.name} is not a video or image.`);
+        }
         const body = new FormData();
         body.append("file", file);
         const response = await fetch("/api/admin/upload", {

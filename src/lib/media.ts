@@ -4,6 +4,16 @@ export const brandLogo =
 export const brandMonogram =
   "https://res.cloudinary.com/duhpqf0ax/image/upload/v1795558047/Metallic_Gold_IO_Monogram_Logo_uj6bha.png";
 
+/** Demo preview clips until Cloudinary samples are uploaded in admin. */
+export const demoSamples = {
+  midnight:
+    "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+  brass:
+    "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+  beats:
+    "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+} as const;
+
 export const studioMedia = {
   logo: brandLogo,
   monogram: brandMonogram,

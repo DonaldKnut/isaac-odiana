@@ -1,12 +1,14 @@
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import {
+  defaultAnnouncements,
   defaultHomepage,
   defaultMusicPage,
   defaultMusicWorks,
   defaultSiteSettings,
 } from "@/lib/cms/defaults";
 import type {
+  AnnouncementsBundle,
   HomepageBundle,
   MusicPageContent,
   MusicWorkContent,
@@ -18,6 +20,7 @@ export const CMS_KEYS = {
   musicWorks: "music.works",
   musicPage: "music.page",
   settings: "site.settings",
+  announcements: "announcements",
 } as const;
 
 function asObject<T>(value: unknown, fallback: T): T {
@@ -67,6 +70,25 @@ export async function getHomepageContent(): Promise<HomepageBundle> {
         ? value.world.rooms
         : defaultHomepage.world.rooms,
     },
+    studioFeed: {
+      ...defaultHomepage.studioFeed,
+      ...(value.studioFeed || {}),
+      eyebrow: {
+        ...defaultHomepage.studioFeed.eyebrow,
+        ...(value.studioFeed?.eyebrow || {}),
+      },
+      title: {
+        ...defaultHomepage.studioFeed.title,
+        ...(value.studioFeed?.title || {}),
+      },
+      body: {
+        ...defaultHomepage.studioFeed.body,
+        ...(value.studioFeed?.body || {}),
+      },
+      items: value.studioFeed?.items?.length
+        ? value.studioFeed.items
+        : defaultHomepage.studioFeed.items,
+    },
     faq: {
       ...defaultHomepage.faq,
       ...value.faq,
@@ -88,6 +110,11 @@ function normalizeMusicWork(work: MusicWorkContent): MusicWorkContent {
     ...work,
     image: images[0] || work.image || "",
     images,
+    sampleAudioUrl: work.sampleAudioUrl || "",
+    platformLinks: (work.platformLinks || []).filter(
+      (link) => link.label.trim() || link.url.trim(),
+    ),
+    tracks: (work.tracks || []).filter((track) => track.title.trim()),
   };
 }
 
@@ -100,14 +127,25 @@ export async function getMusicWorksContent(): Promise<MusicWorkContent[]> {
     ? (value as MusicWorkContent[])
     : defaultMusicWorks;
   return works.map((work) => {
+    const fallback = defaultMusicWorks.find((item) => item.id === work.id);
     const hasGallery = Array.isArray(work.images) && work.images.length > 0;
-    if (!hasGallery) {
-      const fallback = defaultMusicWorks.find((item) => item.id === work.id);
-      if (fallback?.images?.length) {
-        return normalizeMusicWork({ ...work, images: fallback.images });
-      }
-    }
-    return normalizeMusicWork(work);
+    return normalizeMusicWork({
+      ...work,
+      images: hasGallery
+        ? work.images
+        : fallback?.images?.length
+          ? fallback.images
+          : work.images,
+      sampleAudioUrl: work.sampleAudioUrl || fallback?.sampleAudioUrl || "",
+      platformLinks:
+        work.platformLinks?.some((link) => link.url.trim())
+          ? work.platformLinks
+          : fallback?.platformLinks || work.platformLinks,
+      tracks:
+        work.tracks?.some((track) => track.sampleAudioUrl?.trim())
+          ? work.tracks
+          : fallback?.tracks || work.tracks,
+    });
   });
 }
 
@@ -183,6 +221,55 @@ export async function saveMusicPageContent(value: MusicPageContent) {
   });
 }
 
+export async function getAnnouncementsContent(): Promise<AnnouncementsBundle> {
+  const row = await prisma.siteContent.findUnique({
+    where: { key: CMS_KEYS.announcements },
+  });
+  const value = asObject(row?.value, defaultAnnouncements);
+  return {
+    ...defaultAnnouncements,
+    ...value,
+    eyebrow: {
+      ...defaultAnnouncements.eyebrow,
+      ...(value.eyebrow || {}),
+    },
+    title: {
+      ...defaultAnnouncements.title,
+      ...(value.title || {}),
+    },
+    body: {
+      ...defaultAnnouncements.body,
+      ...(value.body || {}),
+    },
+    items: value.items?.length ? value.items : defaultAnnouncements.items,
+  };
+}
+
+export async function saveAnnouncementsContent(value: AnnouncementsBundle) {
+  const json = value as unknown as Prisma.InputJsonValue;
+  await prisma.siteContent.upsert({
+    where: { key: CMS_KEYS.announcements },
+    update: { value: json },
+    create: { key: CMS_KEYS.announcements, value: json },
+  });
+}
+
+export async function getPublishedAnnouncements() {
+  const content = await getAnnouncementsContent();
+  return {
+    ...content,
+    items: content.items
+      .filter((item) => item.published)
+      .sort((a, b) => {
+        if (a.pinned && !b.pinned) return -1;
+        if (!a.pinned && b.pinned) return 1;
+        return (
+          new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+        );
+      }),
+  };
+}
+
 export async function ensureCmsDefaults() {
   await Promise.all([
     prisma.siteContent.upsert({
@@ -215,6 +302,14 @@ export async function ensureCmsDefaults() {
       create: {
         key: CMS_KEYS.settings,
         value: defaultSiteSettings as unknown as Prisma.InputJsonValue,
+      },
+    }),
+    prisma.siteContent.upsert({
+      where: { key: CMS_KEYS.announcements },
+      update: {},
+      create: {
+        key: CMS_KEYS.announcements,
+        value: defaultAnnouncements as unknown as Prisma.InputJsonValue,
       },
     }),
   ]);

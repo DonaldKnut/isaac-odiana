@@ -1,6 +1,6 @@
 "use client";
 
-import { Disc3, Mic2, ShoppingBag, Sparkles } from "lucide-react";
+import { Disc3, Megaphone, Mic2, ShoppingBag, Sparkles } from "lucide-react";
 import { SectionHero } from "@/components/section-hero";
 import { useLocale } from "@/components/locale-provider";
 import type { PageHeroKey } from "@/lib/i18n/dictionary";
@@ -11,6 +11,7 @@ const pageIcons = {
   shop: ShoppingBag,
   podcast: Mic2,
   tutoring: Sparkles,
+  announcements: Megaphone,
   cart: ShoppingBag,
 } as const;
 

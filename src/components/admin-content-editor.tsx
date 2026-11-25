@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useState } from "react";
 import {
   Disc3,
+  Film,
   HelpCircle,
   LayoutGrid,
   Sparkles,
@@ -22,8 +23,11 @@ import { useToast } from "@/components/toast-provider";
 import { UiButton } from "@/components/ui-button";
 import type {
   HomepageBundle,
+  HomeStudioFeedContent,
   LocalizedString,
   MusicPageContent,
+  MusicPlatformLink,
+  MusicTrackSample,
   MusicWorkContent,
   SiteSettings,
 } from "@/lib/cms/types";
@@ -121,6 +125,10 @@ export function AdminContentEditor({
             value={home.world}
             onChange={(world) => setHome({ ...home, world })}
           />
+          <StudioFeedEditor
+            value={home.studioFeed}
+            onChange={(studioFeed) => setHome({ ...home, studioFeed })}
+          />
           <FaqEditor value={home.faq} onChange={(faq) => setHome({ ...home, faq })} />
           <UiButton type="submit" tone="amber" loading={homePending}>
             {homePending ? "Saving…" : "Save homepage"}
@@ -192,13 +200,20 @@ export function AdminContentEditor({
                   {
                     id: `work-${Date.now()}`,
                     title: "New work",
-                    kind: { en: "Single", fr: "Single" },
+                    kind: { en: "Mixtape", fr: "Mixtape" },
                     image: "",
                     year: String(new Date().getFullYear()),
                     emphasis: { en: "", fr: "" },
                     description: { en: "", fr: "" },
                     highlights: [],
                     images: [],
+                    sampleAudioUrl: "",
+                    platformLinks: [
+                      { label: "Spotify", url: "" },
+                      { label: "Apple Music", url: "" },
+                      { label: "YouTube", url: "" },
+                    ],
+                    tracks: [],
                   },
                 ])
               }
@@ -321,6 +336,39 @@ export function AdminContentEditor({
                           }
                         : w,
                     ),
+                  )
+                }
+              />
+              <MediaUploader
+                label="Main sample / preview audio"
+                accept="audio/*"
+                multiple={false}
+                values={work.sampleAudioUrl ? [work.sampleAudioUrl] : []}
+                onChange={(urls) =>
+                  setWorks(
+                    works.map((w, i) =>
+                      i === index
+                        ? { ...w, sampleAudioUrl: urls[0] || "" }
+                        : w,
+                    ),
+                  )
+                }
+              />
+              <PlatformLinksEditor
+                value={work.platformLinks || []}
+                onChange={(platformLinks) =>
+                  setWorks(
+                    works.map((w, i) =>
+                      i === index ? { ...w, platformLinks } : w,
+                    ),
+                  )
+                }
+              />
+              <TracksEditor
+                value={work.tracks || []}
+                onChange={(tracks) =>
+                  setWorks(
+                    works.map((w, i) => (i === index ? { ...w, tracks } : w)),
                   )
                 }
               />
@@ -690,6 +738,306 @@ function WorldEditor({
         </div>
       ))}
     </Section>
+  );
+}
+
+function StudioFeedEditor({
+  value,
+  onChange,
+}: {
+  value: HomeStudioFeedContent;
+  onChange: (value: HomeStudioFeedContent) => void;
+}) {
+  return (
+    <Section title="Studio feed (video / Instagram)" icon={Film}>
+      <p className="text-sm text-smoke">
+        Upload clips or stills for the homepage. Instagram items can link out to
+        the post while hosting the media on Cloudinary.
+      </p>
+      <BilingualField
+        label="Eyebrow"
+        value={value.eyebrow}
+        onChange={(eyebrow) => onChange({ ...value, eyebrow })}
+      />
+      <BilingualField
+        label="Title"
+        value={value.title}
+        onChange={(title) => onChange({ ...value, title })}
+        multiline
+      />
+      <BilingualField
+        label="Body"
+        value={value.body}
+        onChange={(body) => onChange({ ...value, body })}
+        multiline
+      />
+      <div className="flex justify-end">
+        <UiButton
+          type="button"
+          tone="line"
+          onClick={() =>
+            onChange({
+              ...value,
+              items: [
+                {
+                  id: `reel-${Date.now()}`,
+                  kind: "video",
+                  title: { en: "New clip", fr: "Nouveau clip" },
+                  mediaUrl: "",
+                  posterUrl: "",
+                  externalUrl: "",
+                  published: true,
+                },
+                ...value.items,
+              ],
+            })
+          }
+        >
+          Add clip
+        </UiButton>
+      </div>
+      {value.items.map((item, index) => (
+        <div key={item.id} className="space-y-3 border border-line/70 p-4">
+          <div className="flex justify-between gap-3">
+            <p className="text-[0.65rem] uppercase tracking-[0.18em] text-amber">
+              Clip {index + 1}
+            </p>
+            <UiButton
+              type="button"
+              tone="ghost"
+              onClick={() =>
+                onChange({
+                  ...value,
+                  items: value.items.filter((_, i) => i !== index),
+                })
+              }
+            >
+              Remove
+            </UiButton>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="block text-sm text-smoke">
+              Kind
+              <select
+                value={item.kind}
+                onChange={(event) =>
+                  onChange({
+                    ...value,
+                    items: value.items.map((it, i) =>
+                      i === index
+                        ? {
+                            ...it,
+                            kind: event.target.value as "video" | "instagram",
+                          }
+                        : it,
+                    ),
+                  })
+                }
+                className="mt-2 w-full border border-line bg-ink px-3 py-2 text-parchment outline-none focus:border-amber"
+              >
+                <option value="video">Video snippet</option>
+                <option value="instagram">Instagram / social</option>
+              </select>
+            </label>
+            <label className="flex items-center gap-3 text-sm text-smoke">
+              <input
+                type="checkbox"
+                checked={item.published}
+                onChange={(event) =>
+                  onChange({
+                    ...value,
+                    items: value.items.map((it, i) =>
+                      i === index
+                        ? { ...it, published: event.target.checked }
+                        : it,
+                    ),
+                  })
+                }
+                className="accent-amber"
+              />
+              Published on homepage
+            </label>
+          </div>
+          <BilingualField
+            label="Title"
+            value={item.title}
+            onChange={(title) =>
+              onChange({
+                ...value,
+                items: value.items.map((it, i) =>
+                  i === index ? { ...it, title } : it,
+                ),
+              })
+            }
+          />
+          <TextField
+            label="Instagram / external URL (optional)"
+            value={item.externalUrl || ""}
+            onChange={(externalUrl) =>
+              onChange({
+                ...value,
+                items: value.items.map((it, i) =>
+                  i === index ? { ...it, externalUrl } : it,
+                ),
+              })
+            }
+          />
+          <MediaUploader
+            label="Video or still"
+            accept="video/*,image/*"
+            multiple={false}
+            values={item.mediaUrl ? [item.mediaUrl] : []}
+            onChange={(urls) =>
+              onChange({
+                ...value,
+                items: value.items.map((it, i) =>
+                  i === index ? { ...it, mediaUrl: urls[0] || "" } : it,
+                ),
+              })
+            }
+          />
+          <MediaUploader
+            label="Poster image (optional for video)"
+            accept="image/*"
+            multiple={false}
+            values={item.posterUrl ? [item.posterUrl] : []}
+            onChange={(urls) =>
+              onChange({
+                ...value,
+                items: value.items.map((it, i) =>
+                  i === index ? { ...it, posterUrl: urls[0] || "" } : it,
+                ),
+              })
+            }
+          />
+        </div>
+      ))}
+    </Section>
+  );
+}
+
+function PlatformLinksEditor({
+  value,
+  onChange,
+}: {
+  value: MusicPlatformLink[];
+  onChange: (value: MusicPlatformLink[]) => void;
+}) {
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm text-smoke">
+          Platform links (Spotify, Apple Music, YouTube…)
+        </p>
+        <UiButton
+          type="button"
+          tone="line"
+          onClick={() => onChange([...value, { label: "", url: "" }])}
+        >
+          Add link
+        </UiButton>
+      </div>
+      {value.map((link, index) => (
+        <div key={index} className="grid gap-3 md:grid-cols-[0.4fr_1fr_auto]">
+          <input
+            value={link.label}
+            placeholder="Spotify"
+            onChange={(event) =>
+              onChange(
+                value.map((item, i) =>
+                  i === index ? { ...item, label: event.target.value } : item,
+                ),
+              )
+            }
+            className="border border-line bg-ink px-3 py-2 text-parchment outline-none focus:border-amber"
+          />
+          <input
+            value={link.url}
+            placeholder="https://"
+            onChange={(event) =>
+              onChange(
+                value.map((item, i) =>
+                  i === index ? { ...item, url: event.target.value } : item,
+                ),
+              )
+            }
+            className="border border-line bg-ink px-3 py-2 text-parchment outline-none focus:border-amber"
+          />
+          <UiButton
+            type="button"
+            tone="ghost"
+            onClick={() => onChange(value.filter((_, i) => i !== index))}
+          >
+            ×
+          </UiButton>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function TracksEditor({
+  value,
+  onChange,
+}: {
+  value: MusicTrackSample[];
+  onChange: (value: MusicTrackSample[]) => void;
+}) {
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm text-smoke">Track samples (optional)</p>
+        <UiButton
+          type="button"
+          tone="line"
+          onClick={() =>
+            onChange([...value, { title: "Track", sampleAudioUrl: "" }])
+          }
+        >
+          Add track
+        </UiButton>
+      </div>
+      {value.map((track, index) => (
+        <div key={index} className="space-y-3 border border-line/60 p-3">
+          <div className="flex gap-3">
+            <input
+              value={track.title}
+              onChange={(event) =>
+                onChange(
+                  value.map((item, i) =>
+                    i === index ? { ...item, title: event.target.value } : item,
+                  ),
+                )
+              }
+              className="flex-1 border border-line bg-ink px-3 py-2 text-parchment outline-none focus:border-amber"
+              placeholder="Track title"
+            />
+            <UiButton
+              type="button"
+              tone="ghost"
+              onClick={() => onChange(value.filter((_, i) => i !== index))}
+            >
+              ×
+            </UiButton>
+          </div>
+          <MediaUploader
+            label="Track sample audio"
+            accept="audio/*"
+            multiple={false}
+            values={track.sampleAudioUrl ? [track.sampleAudioUrl] : []}
+            onChange={(urls) =>
+              onChange(
+                value.map((item, i) =>
+                  i === index
+                    ? { ...item, sampleAudioUrl: urls[0] || "" }
+                    : item,
+                ),
+              )
+            }
+          />
+        </div>
+      ))}
+    </div>
   );
 }
 

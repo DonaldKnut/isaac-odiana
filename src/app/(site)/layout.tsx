@@ -1,5 +1,6 @@
 import { AdminEditProvider } from "@/components/admin-edit-provider";
 import { AdminPresenceBar } from "@/components/admin-presence-bar";
+import { AnnouncementCallout } from "@/components/announcement-callout";
 import { CartDrawer } from "@/components/cart-drawer";
 import { CartProvider } from "@/components/cart-provider";
 import { NewsletterPopup } from "@/components/newsletter-popup";
@@ -9,6 +10,7 @@ import { WhatsappChat } from "@/components/whatsapp-chat";
 import { getAdminSession } from "@/lib/admin-auth";
 import {
   ensureCmsDefaults,
+  getPublishedAnnouncements,
   getSiteSettings,
 } from "@/lib/cms/content";
 import {
@@ -23,8 +25,9 @@ export default async function SiteLayout({
 }) {
   await ensureCmsDefaults();
   const admin = await getAdminSession();
-  const [settings, unread, recent] = await Promise.all([
+  const [settings, announcements, unread, recent] = await Promise.all([
     getSiteSettings(),
+    getPublishedAnnouncements(),
     admin ? getUnreadNotificationCount() : Promise.resolve(0),
     admin ? getRecentNotifications(12) : Promise.resolve([]),
   ]);
@@ -55,6 +58,7 @@ export default async function SiteLayout({
         </main>
         <SiteFooter settings={settings} />
         <WhatsappChat settings={settings} />
+        <AnnouncementCallout item={announcements.items[0] ?? null} />
         <NewsletterPopup />
         <CartDrawer />
       </CartProvider>
