@@ -87,8 +87,15 @@ export function MusicPortfolio({ works }: { works: MusicWorkContent[] }) {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/35 to-ink/5" />
               <div className="absolute inset-0 flex items-center justify-center opacity-0 transition duration-500 group-hover:opacity-100">
-                <span className="inline-flex h-16 w-16 items-center justify-center border border-amber/45 bg-ink/70 text-amber-bright backdrop-blur-md">
-                  <Play className="h-6 w-6 translate-x-0.5" strokeWidth={1.5} fill="currentColor" />
+                <span className="relative inline-flex h-16 w-16 items-center justify-center">
+                  <span className="absolute inset-0 animate-ping rounded-full border border-amber/40 opacity-40 [animation-duration:2.2s]" />
+                  <span className="relative inline-flex h-16 w-16 items-center justify-center rounded-full border border-amber/45 bg-ink/70 text-amber-bright shadow-[0_0_28px_rgba(212,175,105,0.28)] backdrop-blur-md transition duration-500 group-hover:scale-105">
+                    <Play
+                      className="h-6 w-6 translate-x-0.5 transition duration-500 group-hover:scale-110"
+                      strokeWidth={1.5}
+                      fill="currentColor"
+                    />
+                  </span>
                 </span>
               </div>
               <div className="absolute inset-x-0 bottom-0 p-5 md:p-6">
@@ -124,6 +131,7 @@ function NowPlayingModal({
   const localize = useLocalized();
   const { t } = useLocale();
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const scrubbingRef = useRef(false);
   const [queueIndex, setQueueIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -131,7 +139,8 @@ function NowPlayingModal({
 
   const queue = useMemo(() => (work ? playablesFor(work) : []), [work]);
   const platforms = work ? livePlatformLinks(work) : [];
-  const cover = work ? workGallery(work)[0] || work.image : "";
+  const gallery = work ? workGallery(work) : [];
+  const cover = gallery[0] || work?.image || "";
   const current = queue[queueIndex] ?? null;
 
   useEffect(() => {
@@ -140,18 +149,20 @@ function NowPlayingModal({
     setPlaying(false);
     setProgress(0);
     setDuration(0);
+    scrubbingRef.current = false;
     document.body.style.overflow = "hidden";
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
       if (event.key === " ") {
         event.preventDefault();
-        togglePlay();
+        void togglePlay();
       }
     };
     window.addEventListener("keydown", onKey);
     return () => {
       document.body.style.overflow = "";
       window.removeEventListener("keydown", onKey);
+      audioRef.current?.pause();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [work, onClose]);
@@ -159,32 +170,49 @@ function NowPlayingModal({
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio || !current) return;
+    scrubbingRef.current = false;
+    setProgress(0);
+    setDuration(0);
     audio.src = current.src;
     audio.load();
-    void audio.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
+    void audio
+      .play()
+      .then(() => setPlaying(true))
+      .catch(() => setPlaying(false));
   }, [current?.id]);
 
-  function togglePlay() {
+  async function togglePlay() {
     const audio = audioRef.current;
     if (!audio || !current) return;
-    if (audio.paused) {
-      void audio.play().then(() => setPlaying(true));
-    } else {
-      audio.pause();
+    try {
+      if (audio.paused) {
+        setPlaying(true);
+        await audio.play();
+      } else {
+        audio.pause();
+        setPlaying(false);
+      }
+    } catch {
       setPlaying(false);
     }
   }
 
-  function seek(value: number) {
+  function seekTo(value: number) {
     const audio = audioRef.current;
-    if (!audio || !duration) return;
-    audio.currentTime = value;
-    setProgress(value);
+    if (!audio) return;
+    const total = Number.isFinite(duration) && duration > 0 ? duration : audio.duration;
+    if (!Number.isFinite(total) || total <= 0) return;
+    const next = Math.min(Math.max(value, 0), total);
+    audio.currentTime = next;
+    setProgress(next);
   }
 
   function selectTrack(index: number) {
     setQueueIndex(index);
   }
+
+  const progressPct =
+    duration > 0 ? Math.min(100, Math.max(0, (progress / duration) * 100)) : 0;
 
   return (
     <AnimatePresence>
@@ -209,13 +237,13 @@ function NowPlayingModal({
             role="dialog"
             aria-modal="true"
             aria-labelledby="now-playing-title"
-            className="relative z-10 grid w-full max-w-4xl overflow-hidden border border-line/80 bg-[#0d0c0b] shadow-[0_40px_120px_rgba(0,0,0,0.55)] sm:max-h-[88svh] md:grid-cols-[1.05fr_0.95fr]"
+            className="relative z-10 flex w-full max-w-4xl max-h-[92svh] flex-col overflow-hidden border border-line/80 bg-[#0d0c0b] shadow-[0_40px_120px_rgba(0,0,0,0.55)] md:grid md:grid-cols-[1.05fr_0.95fr] md:grid-rows-1"
             initial={{ opacity: 0, y: 40, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 24, scale: 0.98 }}
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
           >
-            <div className="relative min-h-[280px] md:min-h-[560px]">
+            <div className="relative h-[38vw] max-h-[240px] min-h-[160px] shrink-0 md:h-auto md:max-h-none md:min-h-0">
               <Image
                 src={cover}
                 alt={work.title}
@@ -226,7 +254,7 @@ function NowPlayingModal({
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#0d0c0b] via-transparent to-ink/20" />
               <motion.div
-                className="absolute bottom-6 left-6 flex h-20 w-20 items-center justify-center rounded-full border border-amber/40 bg-ink/55 backdrop-blur-md"
+                className="absolute bottom-5 left-5 flex h-16 w-16 items-center justify-center rounded-full border border-amber/40 bg-ink/55 backdrop-blur-md md:bottom-6 md:left-6 md:h-20 md:w-20"
                 animate={{ rotate: playing ? 360 : 0 }}
                 transition={
                   playing
@@ -234,12 +262,12 @@ function NowPlayingModal({
                     : { duration: 0.4 }
                 }
               >
-                <Disc3 className="h-9 w-9 text-amber-bright" strokeWidth={1.3} />
+                <Disc3 className="h-7 w-7 text-amber-bright md:h-9 md:w-9" strokeWidth={1.3} />
               </motion.div>
             </div>
 
-            <div className="flex max-h-[70svh] flex-col md:max-h-none">
-              <div className="flex items-start justify-between gap-4 border-b border-line/70 px-5 py-5 md:px-7">
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+              <div className="flex shrink-0 items-start justify-between gap-4 border-b border-line/70 px-5 py-4 md:px-7 md:py-5">
                 <div>
                   <p className="text-[0.6rem] uppercase tracking-[0.24em] text-amber">
                     {t.nowPlaying}
@@ -264,55 +292,207 @@ function NowPlayingModal({
                 </button>
               </div>
 
-              <div className="flex-1 space-y-6 overflow-y-auto px-5 py-5 md:px-7">
+              <div className="min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain px-5 py-5 md:px-7">
                 <p className="text-sm leading-relaxed text-sand/90 md:text-base">
                   {localize(work.emphasis)}
                 </p>
+                {work.description ? (
+                  <p className="text-sm leading-relaxed text-smoke md:text-[0.95rem]">
+                    {localize(work.description)}
+                  </p>
+                ) : null}
 
-                <div className="border border-line/80 bg-ink/60 p-4">
-                  <div className="flex items-center gap-4">
-                    <button
-                      type="button"
-                      onClick={togglePlay}
-                      disabled={!current}
-                      className="inline-flex h-14 w-14 shrink-0 cursor-pointer items-center justify-center border border-amber/50 bg-amber/15 text-amber-bright transition hover:bg-amber/25 disabled:cursor-not-allowed disabled:opacity-40"
-                      aria-label={playing ? t.pause : t.play}
-                    >
-                      {playing ? (
-                        <Pause className="h-5 w-5" strokeWidth={1.6} fill="currentColor" />
-                      ) : (
-                        <Play className="h-5 w-5 translate-x-0.5" strokeWidth={1.6} fill="currentColor" />
-                      )}
-                    </button>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm text-parchment">
-                        {current?.title || t.noSampleYet}
-                      </p>
-                      <input
-                        type="range"
-                        min={0}
-                        max={duration || 0}
-                        step={0.1}
-                        value={progress}
+                <div className="relative overflow-hidden border border-line/80 bg-gradient-to-br from-amber/[0.07] via-ink/70 to-ink/90 p-4 md:p-5">
+                  <motion.div
+                    aria-hidden
+                    className="pointer-events-none absolute -left-10 top-1/2 h-40 w-40 -translate-y-1/2 rounded-full bg-amber/20 blur-3xl"
+                    animate={{
+                      opacity: playing ? [0.25, 0.55, 0.25] : 0.12,
+                      scale: playing ? [1, 1.25, 1] : 1,
+                    }}
+                    transition={
+                      playing
+                        ? { duration: 2.8, repeat: Infinity, ease: "easeInOut" }
+                        : { duration: 0.45 }
+                    }
+                  />
+
+                  <div className="relative flex items-center gap-4 md:gap-5">
+                    <div className="relative shrink-0">
+                      {current ? (
+                        <>
+                          <motion.span
+                            aria-hidden
+                            className="absolute inset-0 rounded-full border border-amber/35"
+                            animate={
+                              playing
+                                ? { scale: [1, 1.55], opacity: [0.55, 0] }
+                                : { scale: [1, 1.35], opacity: [0.4, 0] }
+                            }
+                            transition={{
+                              duration: playing ? 1.6 : 2.4,
+                              repeat: Infinity,
+                              ease: "easeOut",
+                            }}
+                          />
+                          <motion.span
+                            aria-hidden
+                            className="absolute inset-0 rounded-full border border-amber-bright/25"
+                            animate={
+                              playing
+                                ? { scale: [1, 1.85], opacity: [0.35, 0] }
+                                : { scale: [1, 1.55], opacity: [0.28, 0] }
+                            }
+                            transition={{
+                              duration: playing ? 1.6 : 2.4,
+                              repeat: Infinity,
+                              ease: "easeOut",
+                              delay: 0.35,
+                            }}
+                          />
+                        </>
+                      ) : null}
+
+                      <motion.button
+                        type="button"
+                        onClick={() => void togglePlay()}
                         disabled={!current}
-                        onChange={(event) => seek(Number(event.target.value))}
-                        className="mt-3 w-full accent-amber"
-                      />
-                      <div className="mt-1 flex justify-between text-[0.65rem] uppercase tracking-[0.14em] text-smoke">
-                        <span>{formatTime(progress)}</span>
-                        <span>{formatTime(duration)}</span>
+                        whileHover={current ? { scale: 1.06 } : undefined}
+                        whileTap={current ? { scale: 0.92 } : undefined}
+                        className={cn(
+                          "relative inline-flex h-16 w-16 cursor-pointer items-center justify-center rounded-full border border-amber/55 bg-gradient-to-br from-amber/30 via-amber/15 to-ink text-amber-bright disabled:cursor-not-allowed disabled:opacity-40",
+                          playing
+                            ? "shadow-[0_0_28px_4px_rgba(212,175,105,0.35)]"
+                            : "shadow-[0_0_18px_0_rgba(212,175,105,0.18)]",
+                        )}
+                        aria-label={playing ? t.pause : t.play}
+                      >
+                        <motion.span
+                          key={playing ? "pause" : "play"}
+                          initial={{ scale: 0.55, opacity: 0 }}
+                          animate={{ scale: playing ? 1 : [1, 1.1, 1], opacity: 1 }}
+                          transition={
+                            playing
+                              ? { duration: 0.2, ease: [0.22, 1, 0.36, 1] }
+                              : {
+                                  scale: {
+                                    duration: 1.8,
+                                    repeat: Infinity,
+                                    ease: "easeInOut",
+                                  },
+                                  opacity: { duration: 0.18 },
+                                }
+                          }
+                          className={cn("inline-flex", !playing && "translate-x-0.5")}
+                        >
+                          {playing ? (
+                            <Pause className="h-6 w-6" strokeWidth={1.5} fill="currentColor" />
+                          ) : (
+                            <Play className="h-6 w-6" strokeWidth={1.5} fill="currentColor" />
+                          )}
+                        </motion.span>
+                      </motion.button>
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-3">
+                        <p className="truncate text-sm text-parchment md:text-base">
+                          {current?.title || t.noSampleYet}
+                        </p>
+                        {playing ? (
+                          <span className="flex h-3.5 items-end gap-[3px]" aria-hidden>
+                            {[0.55, 1, 0.7, 0.9].map((peak, index) => (
+                              <motion.span
+                                key={index}
+                                className="w-[2px] rounded-full bg-amber-bright"
+                                animate={{ height: ["4px", `${peak * 14}px`, "4px"] }}
+                                transition={{
+                                  duration: 0.55 + index * 0.12,
+                                  repeat: Infinity,
+                                  ease: "easeInOut",
+                                  delay: index * 0.08,
+                                }}
+                              />
+                            ))}
+                          </span>
+                        ) : null}
+                      </div>
+
+                      <div className="mt-3">
+                        <div className="relative flex h-8 items-center">
+                          <div className="relative h-1.5 w-full rounded-full bg-line/70">
+                            <div
+                              className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-amber via-amber-bright to-amber"
+                              style={{ width: `${progressPct}%` }}
+                            />
+                            {playing ? (
+                              <motion.div
+                                aria-hidden
+                                className="pointer-events-none absolute inset-y-0 w-16 bg-gradient-to-r from-transparent via-parchment/35 to-transparent"
+                                animate={{ left: ["-20%", "120%"] }}
+                                transition={{
+                                  duration: 1.8,
+                                  repeat: Infinity,
+                                  ease: "easeInOut",
+                                }}
+                              />
+                            ) : null}
+                            <span
+                              aria-hidden
+                              className="pointer-events-none absolute top-1/2 h-3.5 w-3.5 -translate-y-1/2 rounded-full border border-amber-bright/80 bg-parchment shadow-[0_0_12px_rgba(212,175,105,0.45)]"
+                              style={{ left: `calc(${progressPct}% - 7px)` }}
+                            />
+                          </div>
+                          <input
+                            type="range"
+                            min={0}
+                            max={duration > 0 ? duration : 1}
+                            step={0.05}
+                            value={duration > 0 ? progress : 0}
+                            disabled={!current || duration <= 0}
+                            onPointerDown={() => {
+                              scrubbingRef.current = true;
+                            }}
+                            onPointerUp={(event) => {
+                              scrubbingRef.current = false;
+                              seekTo(Number(event.currentTarget.value));
+                            }}
+                            onPointerCancel={() => {
+                              scrubbingRef.current = false;
+                            }}
+                            onInput={(event) => {
+                              scrubbingRef.current = true;
+                              setProgress(Number(event.currentTarget.value));
+                            }}
+                            onChange={(event) => {
+                              seekTo(Number(event.currentTarget.value));
+                            }}
+                            className="absolute inset-0 h-full w-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
+                            aria-label="Seek"
+                          />
+                        </div>
+                        <div className="mt-1 flex justify-between text-[0.65rem] uppercase tracking-[0.14em] text-smoke">
+                          <span>{formatTime(progress)}</span>
+                          <span>{formatTime(duration)}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
                   <audio
                     ref={audioRef}
-                    preload="metadata"
-                    onTimeUpdate={(event) =>
-                      setProgress(event.currentTarget.currentTime)
-                    }
-                    onLoadedMetadata={(event) =>
-                      setDuration(event.currentTarget.duration || 0)
-                    }
+                    preload="auto"
+                    onTimeUpdate={(event) => {
+                      if (scrubbingRef.current) return;
+                      setProgress(event.currentTarget.currentTime);
+                    }}
+                    onLoadedMetadata={(event) => {
+                      const next = event.currentTarget.duration;
+                      setDuration(Number.isFinite(next) && next > 0 ? next : 0);
+                    }}
+                    onDurationChange={(event) => {
+                      const next = event.currentTarget.duration;
+                      setDuration(Number.isFinite(next) && next > 0 ? next : 0);
+                    }}
                     onEnded={() => {
                       if (queueIndex < queue.length - 1) {
                         setQueueIndex((value) => value + 1);
@@ -320,6 +500,7 @@ function NowPlayingModal({
                         setPlaying(false);
                       }
                     }}
+                    onPlaying={() => setPlaying(true)}
                     onPlay={() => setPlaying(true)}
                     onPause={() => setPlaying(false)}
                   />
@@ -368,8 +549,41 @@ function NowPlayingModal({
                   </div>
                 ) : null}
 
+                {work.highlights?.length ? (
+                  <ul className="space-y-2 border-t border-line/60 pt-5">
+                    {work.highlights.map((item, index) => (
+                      <li
+                        key={`${work.id}-highlight-${index}`}
+                        className="flex gap-3 text-sm text-sand/90"
+                      >
+                        <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-amber" />
+                        <span>{localize(item)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+
+                {gallery.length > 1 ? (
+                  <div className="grid grid-cols-3 gap-2 pb-1">
+                    {gallery.slice(0, 3).map((src) => (
+                      <div
+                        key={src}
+                        className="relative aspect-[4/5] overflow-hidden border border-line/70"
+                      >
+                        <Image
+                          src={src}
+                          alt=""
+                          fill
+                          className="object-cover"
+                          sizes="120px"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+
                 {platforms.length > 0 ? (
-                  <div>
+                  <div className="pb-2">
                     <p className="text-[0.6rem] uppercase tracking-[0.2em] text-amber">
                       {t.listenOn}
                     </p>

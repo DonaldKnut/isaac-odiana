@@ -373,6 +373,7 @@ export const defaultMusicWorks: MusicWorkContent[] = [
     title: "Keys & Smoke",
     kind: L("Visual", "Visuel"),
     image: studioMedia.piano,
+    images: [studioMedia.piano, studioMedia.vinyl, studioMedia.studio],
     span: "lg:col-span-2",
     year: "2024",
     emphasis: L(
@@ -388,12 +389,26 @@ export const defaultMusicWorks: MusicWorkContent[] = [
       L("Piano as subject and symbol", "Le piano comme sujet et symbole"),
       L("Pairs with late-night listening", "À assortir à l’écoute nocturne"),
     ],
+    sampleAudioUrl: demoSamples.keys,
+    platformLinks: [
+      {
+        label: "YouTube",
+        url: "https://www.youtube.com/results?search_query=Keys+and+Smoke+Isaac+Odiana",
+      },
+    ],
+    tracks: [
+      {
+        title: "Keys & Smoke — ambient cut",
+        sampleAudioUrl: demoSamples.keys,
+      },
+    ],
   },
   {
     id: "studio-reels",
     title: "Studio Reels",
     kind: L("Process", "Processus"),
     image: studioMedia.studio,
+    images: [studioMedia.studio, studioMedia.mic, studioMedia.headphones],
     year: "2025",
     emphasis: L(
       "Behind the glass — process over polish.",
@@ -408,12 +423,26 @@ export const defaultMusicWorks: MusicWorkContent[] = [
       L("Session snapshots", "Instantanés de session"),
       L("Useful for mentoring narratives", "Utile pour le mentorat"),
     ],
+    sampleAudioUrl: demoSamples.reels,
+    platformLinks: [
+      {
+        label: "YouTube",
+        url: "https://www.youtube.com/results?search_query=Studio+Reels+Isaac+Odiana",
+      },
+    ],
+    tracks: [
+      {
+        title: "Studio Reels — session bed",
+        sampleAudioUrl: demoSamples.reels,
+      },
+    ],
   },
   {
     id: "ear-for-space",
     title: "Ear for Space",
     kind: L("Gallery", "Galerie"),
     image: studioMedia.headphones,
+    images: [studioMedia.headphones, studioMedia.piano, studioMedia.nightCity],
     year: "2023",
     emphasis: L(
       "Listening as design — space, silence, and attention.",
@@ -427,6 +456,19 @@ export const defaultMusicWorks: MusicWorkContent[] = [
       L("Curated gallery series", "Série de galerie curatée"),
       L("Focus on silence and dynamics", "Focus silence et dynamique"),
       L("Complements tutoring themes", "Complète les thèmes de tutorat"),
+    ],
+    sampleAudioUrl: demoSamples.space,
+    platformLinks: [
+      {
+        label: "Spotify",
+        url: "https://open.spotify.com/search/Ear%20for%20Space%20Isaac%20Odiana",
+      },
+    ],
+    tracks: [
+      {
+        title: "Ear for Space — listening bed",
+        sampleAudioUrl: demoSamples.space,
+      },
     ],
   },
 ];

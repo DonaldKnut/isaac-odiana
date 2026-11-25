@@ -12,6 +12,12 @@ export const demoSamples = {
     "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
   beats:
     "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+  keys:
+    "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
+  reels:
+    "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3",
+  space:
+    "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3",
 } as const;
 
 export const studioMedia = {
