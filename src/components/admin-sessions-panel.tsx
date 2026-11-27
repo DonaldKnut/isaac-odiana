@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useTransition } from "react";
 import { CalendarDays, CalendarPlus } from "lucide-react";
 import {
   createAvailabilitySlot,
@@ -10,6 +10,7 @@ import {
 } from "@/app/actions/sessions";
 import { IconBadge } from "@/components/illustrations";
 import { useLocale } from "@/components/locale-provider";
+import { useActionToast, useToast } from "@/components/toast-provider";
 import { formatSlotRange } from "@/lib/date";
 import { resolveLocalized } from "@/lib/i18n/localize-content";
 
@@ -33,6 +34,8 @@ type SessionRow = {
 export function AdminSessionsPanel({ sessions }: { sessions: SessionRow[] }) {
   const { t, locale } = useLocale();
   const a = t.admin.common;
+  const toast = useToast();
+  const [, startTransition] = useTransition();
   const [slotState, slotAction, slotPending] = useActionState(
     createAvailabilitySlot,
     initial,
@@ -41,6 +44,20 @@ export function AdminSessionsPanel({ sessions }: { sessions: SessionRow[] }) {
     createTutoringSession,
     initial,
   );
+
+  useActionToast(slotState, "Slot added", "Slot error");
+  useActionToast(sessionState, "Session created", "Session error");
+
+  function removeSlot(id: string) {
+    startTransition(async () => {
+      try {
+        await deleteAvailabilitySlot(id);
+        toast.success("Slot removed", "Availability updated.");
+      } catch {
+        toast.error("Couldn’t remove slot", "Try again in a moment.");
+      }
+    });
+  }
 
   return (
     <div className="space-y-12">
@@ -73,7 +90,7 @@ export function AdminSessionsPanel({ sessions }: { sessions: SessionRow[] }) {
                   {!slot.isBooked ? (
                     <button
                       type="button"
-                      onClick={() => deleteAvailabilitySlot(slot.id)}
+                      onClick={() => removeSlot(slot.id)}
                       className="cursor-pointer text-[0.65rem] uppercase tracking-[0.14em] text-smoke hover:text-parchment"
                     >
                       {a.remove}

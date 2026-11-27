@@ -9,6 +9,7 @@ import {
   Trash2,
   Upload,
 } from "lucide-react";
+import { useToast } from "@/components/toast-provider";
 import { cn } from "@/lib/utils";
 
 type MediaUploaderProps = {
@@ -37,6 +38,7 @@ export function MediaUploader({
   accept = "image/*",
 }: MediaUploaderProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const toast = useToast();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
@@ -84,8 +86,14 @@ export function MediaUploader({
         uploaded.push(data.url);
       }
       onChange(multiple ? [...values, ...uploaded] : uploaded.slice(0, 1));
+      toast.success(
+        uploaded.length > 1 ? "Files uploaded" : "File uploaded",
+        `${uploaded.length} item${uploaded.length === 1 ? "" : "s"} ready.`,
+      );
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Upload failed");
+      const message = err instanceof Error ? err.message : "Upload failed";
+      setError(message);
+      toast.error("Upload failed", message);
     } finally {
       setBusy(false);
       if (inputRef.current) inputRef.current.value = "";

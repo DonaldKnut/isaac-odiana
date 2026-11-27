@@ -8,6 +8,7 @@ import {
   type TutoringActionState,
 } from "@/app/actions/tutoring";
 import { useLocale } from "@/components/locale-provider";
+import { useToast } from "@/components/toast-provider";
 import { emailSchema, firstZodError, nameSchema } from "@/lib/validation";
 import { cn } from "@/lib/utils";
 
@@ -27,6 +28,7 @@ export function MentorshipRequestForm({
   compact?: boolean;
 }) {
   const { t, locale } = useLocale();
+  const toast = useToast();
   const [state, setState] = useState(initial);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [pending, startTransition] = useTransition();
@@ -75,10 +77,12 @@ export function MentorshipRequestForm({
       }
     }
     setFieldErrors(next);
+    const message = firstZodError(parsed.error, locale);
     setState({
       ok: false,
-      message: firstZodError(parsed.error, locale),
+      message,
     });
+    toast.error("Check the form", message);
     return false;
   }
 
@@ -105,8 +109,11 @@ export function MentorshipRequestForm({
         startTransition(async () => {
           const result = await submitMentorshipRequest(initial, formData);
           setState(result);
-          if (!result.ok) {
+          if (result.ok) {
+            toast.success("Request sent", result.message);
+          } else {
             setFieldErrors({});
+            toast.error("Couldn’t send request", result.message);
           }
         });
       }}

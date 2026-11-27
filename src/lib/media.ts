@@ -4,6 +4,49 @@ export const brandLogo =
 export const brandMonogram =
   "https://res.cloudinary.com/duhpqf0ax/image/upload/v1795558047/Metallic_Gold_IO_Monogram_Logo_uj6bha.png";
 
+export const socialLinks = {
+  instagram: "https://www.instagram.com/isaac_odiana/",
+  drumSession1:
+    "https://www.instagram.com/reel/DWPDz0iCE_H/?utm_source=ig_web_copy_link&bqrl=MzRlODBiNWFlZA==&avpt=MzRlODBiNWFlZA==",
+  session2:
+    "https://www.instagram.com/reel/DZZ6ynoofrg/?utm_source=ig_web_copy_link&fqnt=MzRlODBiNWFlZA==&avpt=MzRlODBiNWFlZA==",
+  session3:
+    "https://www.instagram.com/reel/DSSoMDlCINe/?utm_source=ig_web_copy_link&cnvx=MzRlODBiNWFlZA==&avpt=MzRlODBiNWFlZA==",
+} as const;
+
+export const isaacMedia = {
+  videos: {
+    joySpring:
+      "https://res.cloudinary.com/dajpllbyu/video/upload/v1795788197/JOY_SPRING_._afro_jazz_musician_drums_guitar._zeekingz_pro_%EF%B8%8F_iyl8jn.mp4",
+    soundcheck:
+      "https://res.cloudinary.com/dajpllbyu/video/upload/v1795788187/Psalm_122_.I_was_glad_when_they_said_unto_me_Let_us_go_into_the_house_of_the_LORD.Soundcheck_jkqzjc.mp4",
+    shakaraEp:
+      "https://res.cloudinary.com/dajpllbyu/video/upload/v1795788186/%EF%B8%8F_New_music_from_my_upcoming_EP_SHAKARA_DON_END_will_be_available_soon_on_all_streaming_platf_kkfgya.mp4",
+    residency:
+      "https://res.cloudinary.com/dajpllbyu/video/upload/v1795788184/Kicking_off_5_days_Residency_this_weekend_with_blackmany.music_trio_Live_show_next_Wednesday_2_x5lbav.mp4",
+    stories:
+      "https://res.cloudinary.com/dajpllbyu/video/upload/v1795788183/Instagram_isaac_odiana_stories_all_tbqdin.mp4",
+    nardis:
+      "https://res.cloudinary.com/dajpllbyu/video/upload/v1795788183/NARDIS_With_my_brother_brice_essomba_Salon_demesy_coiffure_Full_video_on_YouTube_Isaac_O_psgja5.mp4",
+    valence1:
+      "https://res.cloudinary.com/dajpllbyu/video/upload/v1795788182/Nothing_beats_Nature_._Thank_you_people_of_Valence_%EF%B8%8F._nature_life_travel_musician_1_cybhol.mp4",
+    valence2:
+      "https://res.cloudinary.com/dajpllbyu/video/upload/v1795788182/Nothing_beats_Nature_._Thank_you_people_of_Valence_%EF%B8%8F._nature_life_travel_musician_hdnchn.mp4",
+  },
+  images: {
+    valencePortrait:
+      "https://res.cloudinary.com/dajpllbyu/image/upload/v1795788185/Nothing_beats_Nature_._Thank_you_people_of_Valence_%EF%B8%8F._nature_life_travel_musician_jod7fj.jpg",
+    reborn1:
+      "https://res.cloudinary.com/dajpllbyu/image/upload/v1795788182/REBORN_disponible_now_sur_toutes_les_plateformes_de_t%C3%A9l%C3%A9chargement_%EF%B8%8FMerci_%C3%A0_toute_l_%C3%A9quipe_1_flujeg.jpg",
+    reborn2:
+      "https://res.cloudinary.com/dajpllbyu/image/upload/v1795788181/REBORN_disponible_now_sur_toutes_les_plateformes_de_t%C3%A9l%C3%A9chargement_%EF%B8%8FMerci_%C3%A0_toute_l_%C3%A9quipe_2_tijauq.jpg",
+    reborn3:
+      "https://res.cloudinary.com/dajpllbyu/image/upload/v1795788181/REBORN_disponible_now_sur_toutes_les_plateformes_de_t%C3%A9l%C3%A9chargement_%EF%B8%8FMerci_%C3%A0_toute_l_%C3%A9quipe_3_iyi9mh.jpg",
+    reborn4:
+      "https://res.cloudinary.com/dajpllbyu/image/upload/v1795788181/REBORN_disponible_now_sur_toutes_les_plateformes_de_t%C3%A9l%C3%A9chargement_%EF%B8%8FMerci_%C3%A0_toute_l_%C3%A9quipe_4_dqnhxr.jpg",
+  },
+} as const;
+
 /** Demo preview clips until Cloudinary samples are uploaded in admin. */
 export const demoSamples = {
   midnight:
@@ -23,35 +66,26 @@ export const demoSamples = {
 export const studioMedia = {
   logo: brandLogo,
   monogram: brandMonogram,
-  jazzStage:
-    "https://images.unsplash.com/photo-1511192336575-5a79af67a629?auto=format&fit=crop&w=1800&q=80",
-  vinyl:
-    "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1600&q=80",
-  studio:
-    "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&w=1600&q=80",
+  jazzStage: isaacMedia.images.reborn1,
+  vinyl: isaacMedia.images.reborn4,
+  studio: isaacMedia.images.reborn2,
   headphones:
     "https://images.unsplash.com/photo-1483412033650-1015dcb7a1fb?auto=format&fit=crop&w=1600&q=80",
   writing:
     "https://images.unsplash.com/photo-1456513080867-f4b11be855b0?auto=format&fit=crop&w=1600&q=80",
-  mentorship:
-    "https://images.unsplash.com/photo-1516280440614-6697288d5f18?auto=format&fit=crop&w=1600&q=80",
-  nightCity:
-    "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1800&q=80",
+  mentorship: isaacMedia.images.reborn3,
+  nightCity: isaacMedia.images.reborn1,
   mic:
     "https://images.unsplash.com/photo-1478737270239-2f02b77fc618?auto=format&fit=crop&w=1600&q=80",
-  piano:
-    "https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?auto=format&fit=crop&w=1600&q=80",
-  drums:
-    "https://images.unsplash.com/photo-1519892300165-cb5542fb47c7?auto=format&fit=crop&w=1600&q=80",
-  portrait:
-    "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1200&q=80",
-  gift:
-    "https://images.unsplash.com/photo-1513201099705-ce9226a76f90?auto=format&fit=crop&w=1600&q=80",
+  piano: isaacMedia.images.reborn2,
+  drums: isaacMedia.images.reborn3,
+  portrait: isaacMedia.images.valencePortrait,
+  gift: isaacMedia.images.reborn4,
 };
 
 export const sessionCovers: Record<string, string> = {
-  "one-to-one-craft": studioMedia.studio,
-  "jazz-vocals-lab": studioMedia.mic,
+  "one-to-one-craft": studioMedia.portrait,
+  "jazz-vocals-lab": studioMedia.jazzStage,
   "beats-arrangement": studioMedia.drums,
 };
 
@@ -152,7 +186,7 @@ export const musicPortfolio: MusicWork[] = [
     id: "ear-for-space",
     title: "Ear for Space",
     kind: "Gallery",
-    image: studioMedia.headphones,
+    image: studioMedia.portrait,
     span: "",
     year: "2023",
     emphasis: "Listening as design — space, silence, and attention.",

@@ -4,7 +4,9 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { AnimatePresence, motion } from "framer-motion";
@@ -56,7 +58,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={value}>
       {children}
-      <div className="pointer-events-none fixed bottom-6 right-6 z-[100] flex w-[min(92vw,360px)] flex-col gap-3">
+      <div className="pointer-events-none fixed bottom-6 right-6 z-[140] flex w-[min(92vw,360px)] flex-col gap-3">
         <AnimatePresence>
           {toasts.map((toast) => (
             <motion.div
@@ -107,4 +109,23 @@ export function useToast() {
     throw new Error("useToast must be used within ToastProvider");
   }
   return context;
+}
+
+/** Toast success/error for server-action `{ ok, message }` results. */
+export function useActionToast(
+  state: { ok: boolean; message: string },
+  successTitle = "Done",
+  errorTitle = "Something went wrong",
+) {
+  const toast = useToast();
+  const seen = useRef<string>("");
+
+  useEffect(() => {
+    if (!state.message) return;
+    const key = `${state.ok}:${state.message}`;
+    if (seen.current === key) return;
+    seen.current = key;
+    if (state.ok) toast.success(successTitle, state.message);
+    else toast.error(errorTitle, state.message);
+  }, [state.ok, state.message, toast, successTitle, errorTitle]);
 }

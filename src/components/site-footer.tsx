@@ -2,12 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Megaphone, type LucideIcon } from "lucide-react";
+import { Megaphone, Share2, type LucideIcon } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
 import { siteNavIcons } from "@/components/illustrations";
 import { useLocale } from "@/components/locale-provider";
 import { useLocalized } from "@/components/localized";
-import { studioMedia } from "@/lib/media";
+import { socialLinks, studioMedia } from "@/lib/media";
 import type { SiteSettings } from "@/lib/cms/types";
 
 export function SiteFooter({ settings }: { settings: SiteSettings }) {
@@ -55,6 +55,15 @@ export function SiteFooter({ settings }: { settings: SiteSettings }) {
               </Link>
             );
           })}
+          <a
+            href={socialLinks.instagram}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-amber-bright transition hover:text-parchment"
+          >
+            <Share2 className="h-3 w-3" strokeWidth={1.6} />
+            Instagram
+          </a>
           <Link
             href="/admin/login"
             className="text-sand/60 transition hover:text-amber-bright"

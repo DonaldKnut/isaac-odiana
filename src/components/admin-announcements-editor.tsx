@@ -1,13 +1,13 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useState } from "react";
 import { Megaphone } from "lucide-react";
 import {
   saveAnnouncementsAction,
   type CmsActionState,
 } from "@/app/actions/cms";
 import { MediaUploader } from "@/components/media-uploader";
-import { useToast } from "@/components/toast-provider";
+import { useActionToast } from "@/components/toast-provider";
 import { UiButton } from "@/components/ui-button";
 import type {
   AnnouncementItem,
@@ -35,13 +35,7 @@ export function AdminAnnouncementsEditor({
     saveAnnouncementsAction,
     initial,
   );
-  const toast = useToast();
-
-  useEffect(() => {
-    if (!state.message) return;
-    if (state.ok) toast.success("Saved", state.message);
-    else toast.error("Error", state.message);
-  }, [state, toast]);
+  useActionToast(state, "Saved", "Couldn’t save");
 
   function updateItem(index: number, next: AnnouncementItem) {
     setValue({

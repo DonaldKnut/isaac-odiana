@@ -9,6 +9,7 @@ import {
 } from "@/app/actions/podcast";
 import { MediaUploader } from "@/components/media-uploader";
 import { useLocale } from "@/components/locale-provider";
+import { useActionToast } from "@/components/toast-provider";
 import { UiButton } from "@/components/ui-button";
 
 const initial: PodcastActionState = { ok: false, message: "" };
@@ -44,6 +45,8 @@ export function AdminPodcastForm({
   const [audioUrl, setAudioUrl] = useState(episode?.audioUrl ?? "");
   const { t } = useLocale();
   const a = t.admin.common;
+
+  useActionToast(state, editing ? "Episode updated" : "Episode created", "Podcast error");
 
   useEffect(() => {
     setCoverUrl(episode?.coverUrl ?? "");

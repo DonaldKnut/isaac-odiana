@@ -1,10 +1,10 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useState } from "react";
 import { Eye, EyeOff, LogIn } from "lucide-react";
 import { loginAdmin, type LoginState } from "@/app/actions/admin-auth";
 import { useLocale } from "@/components/locale-provider";
-import { useToast } from "@/components/toast-provider";
+import { useActionToast } from "@/components/toast-provider";
 import { UiButton } from "@/components/ui-button";
 
 const initial: LoginState = { ok: false, message: "" };
@@ -12,15 +12,8 @@ const initial: LoginState = { ok: false, message: "" };
 export function AdminLoginForm() {
   const [state, action, pending] = useActionState(loginAdmin, initial);
   const [showPassword, setShowPassword] = useState(false);
-  const toast = useToast();
   const { t } = useLocale();
-
-  useEffect(() => {
-    if (state.message && !state.ok) {
-      toast.error("Sign in failed", state.message);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.message, state.ok]);
+  useActionToast(state, "Signed in", "Sign in failed");
 
   return (
     <form action={action} className="mt-8 space-y-5 min-[360px]:mt-10 min-[360px]:space-y-6">

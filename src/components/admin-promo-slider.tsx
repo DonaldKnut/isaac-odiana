@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
+import { isaacMedia } from "@/lib/media";
 
 type Slide =
   | { id: string; kind: "video"; src: string; poster: string }
@@ -9,28 +10,26 @@ type Slide =
 
 const slides: Slide[] = [
   {
-    id: "v1",
+    id: "nardis",
     kind: "video",
-    src: "https://videos.pexels.com/video-files/2022395/2022395-uhd_2560_1440_25fps.mp4",
-    poster:
-      "https://images.unsplash.com/photo-1511192336575-5a79af67a629?auto=format&fit=crop&w=1800&q=80",
+    src: isaacMedia.videos.nardis,
+    poster: isaacMedia.images.reborn1,
   },
   {
-    id: "img1",
+    id: "valence-portrait",
     kind: "image",
-    src: "https://images.unsplash.com/photo-1511192336575-5a79af67a629?auto=format&fit=crop&w=1800&q=80",
+    src: isaacMedia.images.valencePortrait,
   },
   {
-    id: "v2",
+    id: "joy-spring",
     kind: "video",
-    src: "https://videos.pexels.com/video-files/3209822/3209822-uhd_2560_1440_25fps.mp4",
-    poster:
-      "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1800&q=80",
+    src: isaacMedia.videos.joySpring,
+    poster: isaacMedia.images.reborn2,
   },
   {
-    id: "img2",
+    id: "reborn-art",
     kind: "image",
-    src: "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&w=1800&q=80",
+    src: isaacMedia.images.reborn4,
   },
 ];
 

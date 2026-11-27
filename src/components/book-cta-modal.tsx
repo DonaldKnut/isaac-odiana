@@ -8,13 +8,13 @@ import { ArrowRight, CalendarHeart, Send, X } from "lucide-react";
 import { MentorshipRequestForm } from "@/components/mentorship-request-form";
 import { useLocale } from "@/components/locale-provider";
 import { ModalShell } from "@/components/modal-shell";
-import { studioMedia } from "@/lib/media";
+import { isaacMedia } from "@/lib/media";
 
 const promoSlides = [
-  studioMedia.mentorship,
-  studioMedia.studio,
-  studioMedia.mic,
-  studioMedia.jazzStage,
+  isaacMedia.images.valencePortrait,
+  isaacMedia.images.reborn1,
+  isaacMedia.images.reborn2,
+  isaacMedia.images.reborn4,
 ];
 
 export function BookCtaModal({

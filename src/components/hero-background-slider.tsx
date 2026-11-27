@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
+import { isaacMedia } from "@/lib/media";
 
 type Slide =
   | { id: string; kind: "video"; src: string; poster: string; label: string }
@@ -9,38 +10,42 @@ type Slide =
 
 const slides: Slide[] = [
   {
-    id: "rehearsal",
+    id: "joy-spring",
     kind: "video",
-    src: "https://videos.pexels.com/video-files/3571264/3571264-uhd_2560_1440_30fps.mp4",
-    poster:
-      "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=2400&q=80",
-    label: "Studio rehearsal",
+    src: isaacMedia.videos.joySpring,
+    poster: isaacMedia.images.reborn1,
+    label: "Joy Spring · Afro-jazz",
   },
   {
-    id: "crowd",
+    id: "residency",
     kind: "video",
-    src: "https://videos.pexels.com/video-files/2022395/2022395-uhd_2560_1440_25fps.mp4",
-    poster:
-      "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=2400&q=80",
-    label: "Live energy",
+    src: isaacMedia.videos.residency,
+    poster: isaacMedia.images.reborn2,
+    label: "Blackmany Trio · Residency",
   },
   {
-    id: "vinyl-spin",
+    id: "shakara-ep",
     kind: "video",
-    src: "https://videos.pexels.com/video-files/3209822/3209822-uhd_2560_1440_25fps.mp4",
-    poster:
-      "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=2400&q=80",
-    label: "Night records",
+    src: isaacMedia.videos.shakaraEp,
+    poster: isaacMedia.images.reborn4,
+    label: "Shakara Don End · EP",
   },
   {
-    id: "present",
+    id: "soundcheck",
+    kind: "video",
+    src: isaacMedia.videos.soundcheck,
+    poster: isaacMedia.images.reborn3,
+    label: "Psalm 122 · Soundcheck",
+  },
+  {
+    id: "valence",
     kind: "image",
-    src: "https://images.unsplash.com/photo-1513201099705-ce9226a76f90?auto=format&fit=crop&w=2400&q=80",
-    label: "The gift of craft",
+    src: isaacMedia.images.valencePortrait,
+    label: "Valence · On the road",
   },
 ];
 
-const INTERVAL_MS = 7000;
+const INTERVAL_MS = 7500;
 
 export function HeroBackgroundSlider() {
   const [index, setIndex] = useState(0);

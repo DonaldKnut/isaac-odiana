@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useLocale } from "@/components/locale-provider";
 import { useLocalized } from "@/components/localized";
+import { useToast } from "@/components/toast-provider";
 import type { MusicWorkContent } from "@/lib/cms/types";
 import { cn } from "@/lib/utils";
 
@@ -130,6 +131,7 @@ function NowPlayingModal({
 }) {
   const localize = useLocalized();
   const { t } = useLocale();
+  const toast = useToast();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const scrubbingRef = useRef(false);
   const [queueIndex, setQueueIndex] = useState(0);
@@ -178,8 +180,11 @@ function NowPlayingModal({
     void audio
       .play()
       .then(() => setPlaying(true))
-      .catch(() => setPlaying(false));
-  }, [current?.id]);
+      .catch(() => {
+        setPlaying(false);
+        toast.error(t.play, t.noSampleYet);
+      });
+  }, [current?.id, toast, t.play, t.noSampleYet]);
 
   async function togglePlay() {
     const audio = audioRef.current;
@@ -194,6 +199,7 @@ function NowPlayingModal({
       }
     } catch {
       setPlaying(false);
+      toast.error(t.play, t.noSampleYet);
     }
   }
 

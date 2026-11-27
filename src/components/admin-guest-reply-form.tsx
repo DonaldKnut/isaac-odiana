@@ -1,12 +1,12 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState } from "react";
 import {
   replyToBookingGuest,
   replyToMentorshipRequest,
   type AdminReplyState,
 } from "@/app/actions/admin-replies";
-import { useToast } from "@/components/toast-provider";
+import { useActionToast } from "@/components/toast-provider";
 
 const initial: AdminReplyState = { ok: false, message: "" };
 
@@ -25,16 +25,10 @@ export function AdminGuestReplyForm({
   meetingUrl?: string | null;
   slotLabel?: string;
 }) {
-  const toast = useToast();
   const action =
     kind === "request" ? replyToMentorshipRequest : replyToBookingGuest;
   const [state, formAction, pending] = useActionState(action, initial);
-
-  useEffect(() => {
-    if (!state.message) return;
-    if (state.ok) toast.success("Sent", state.message);
-    else toast.error("Couldn’t send", state.message);
-  }, [state, toast]);
+  useActionToast(state, "Sent", "Couldn’t send");
 
   return (
     <form action={formAction} className="mt-4 space-y-3 border-t border-line/70 pt-4">

@@ -9,6 +9,7 @@ import {
 } from "@/app/actions/tutoring";
 import { useLocale } from "@/components/locale-provider";
 import { ModalShell } from "@/components/modal-shell";
+import { useToast } from "@/components/toast-provider";
 import { UiButton } from "@/components/ui-button";
 import { formatSlotRange } from "@/lib/date";
 import { resolveLocalized } from "@/lib/i18n/localize-content";
@@ -83,14 +84,23 @@ function BookingForm({
   onClose: () => void;
 }) {
   const { t, locale } = useLocale();
+  const toast = useToast();
   const [slotId, setSlotId] = useState(session.slots[0]?.id ?? "");
   const [state, action, pending] = useActionState(bookTutoringSlot, initial);
 
   useEffect(() => {
-    if (state.ok && state.checkoutUrl) {
-      window.location.href = state.checkoutUrl;
+    if (!state.message) return;
+    if (!state.ok) {
+      toast.error("Booking failed", state.message);
+      return;
     }
-  }, [state]);
+    if (state.checkoutUrl) {
+      toast.info("Redirecting", "Opening Stripe checkout…");
+      window.location.href = state.checkoutUrl;
+      return;
+    }
+    toast.success("You’re booked", state.message);
+  }, [state, toast]);
 
   const selectedSlot = useMemo(
     () => session.slots.find((slot) => slot.id === slotId) ?? null,

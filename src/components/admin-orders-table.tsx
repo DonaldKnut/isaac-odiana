@@ -1,12 +1,12 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useState } from "react";
 import { ChevronDown, Mail, UserRound } from "lucide-react";
 import {
   markOrderFulfilled,
   type OrderActionState,
 } from "@/app/actions/admin-orders";
-import { useToast } from "@/components/toast-provider";
+import { useActionToast } from "@/components/toast-provider";
 import { formatMoney } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
@@ -24,14 +24,8 @@ export type AdminOrderRow = {
 const initial: OrderActionState = { ok: false, message: "" };
 
 function FulfilForm({ orderId, status }: { orderId: string; status: string }) {
-  const toast = useToast();
   const [state, action, pending] = useActionState(markOrderFulfilled, initial);
-
-  useEffect(() => {
-    if (!state.message) return;
-    if (state.ok) toast.success("Orders", state.message);
-    else toast.error("Orders", state.message);
-  }, [state, toast]);
+  useActionToast(state, "Order updated", "Order error");
 
   if (status === "FULFILLED") {
     return (

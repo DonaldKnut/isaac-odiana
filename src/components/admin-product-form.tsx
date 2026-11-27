@@ -10,6 +10,7 @@ import {
 } from "@/app/actions/products";
 import { MediaUploader } from "@/components/media-uploader";
 import { useLocale } from "@/components/locale-provider";
+import { useActionToast } from "@/components/toast-provider";
 import { UiButton } from "@/components/ui-button";
 import { getProductImages } from "@/lib/products";
 
@@ -48,6 +49,8 @@ export function AdminProductForm({
   );
   const { t } = useLocale();
   const a = t.admin.common;
+
+  useActionToast(state, editing ? "Product updated" : "Product created", "Product error");
 
   useEffect(() => {
     setImages(product ? getProductImages(product) : []);

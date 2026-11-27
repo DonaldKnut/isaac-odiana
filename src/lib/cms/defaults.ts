@@ -1,4 +1,4 @@
-import { demoSamples, studioMedia } from "@/lib/media";
+import { demoSamples, isaacMedia, socialLinks, studioMedia } from "@/lib/media";
 import type {
   AnnouncementsBundle,
   HomepageBundle,
@@ -176,10 +176,65 @@ export const defaultHomepage: HomepageBundle = {
       "Extraits depuis la salle.",
     ),
     body: L(
-      "Video cuts and Instagram moments — uploaded from the studio and shown here first.",
-      "Coupes vidéo et moments Instagram — publiés depuis le studio et visibles ici d’abord.",
+      "Live drum sessions, residencies, and Instagram moments straight from Isaac’s studio.",
+      "Sessions batterie live, résidences et moments Instagram directement depuis le studio d’Isaac.",
     ),
-    items: [],
+    items: [
+      {
+        id: "reel-joy-spring",
+        kind: "instagram",
+        title: L("Joy Spring · Afro-jazz drum session", "Joy Spring · Session batterie afro-jazz"),
+        mediaUrl: isaacMedia.videos.joySpring,
+        posterUrl: isaacMedia.images.reborn1,
+        externalUrl: socialLinks.drumSession1,
+        published: true,
+      },
+      {
+        id: "reel-shakara-ep",
+        kind: "instagram",
+        title: L("SHAKARA DON END — Upcoming EP", "SHAKARA DON END — Nouvel EP bientôt"),
+        mediaUrl: isaacMedia.videos.shakaraEp,
+        posterUrl: isaacMedia.images.reborn4,
+        externalUrl: socialLinks.session2,
+        published: true,
+      },
+      {
+        id: "reel-residency",
+        kind: "instagram",
+        title: L("5-Day Residency · Blackmany Trio", "Résidence 5 jours · Blackmany Trio"),
+        mediaUrl: isaacMedia.videos.residency,
+        posterUrl: isaacMedia.images.reborn2,
+        externalUrl: socialLinks.session3,
+        published: true,
+      },
+      {
+        id: "reel-nardis",
+        kind: "video",
+        title: L("Nardis · Live with Brice Essomba", "Nardis · Live avec Brice Essomba"),
+        mediaUrl: isaacMedia.videos.nardis,
+        posterUrl: isaacMedia.images.reborn3,
+        externalUrl: socialLinks.instagram,
+        published: true,
+      },
+      {
+        id: "reel-soundcheck",
+        kind: "video",
+        title: L("Psalm 122 · Soundcheck", "Psaume 122 · Balance son"),
+        mediaUrl: isaacMedia.videos.soundcheck,
+        posterUrl: isaacMedia.images.reborn1,
+        externalUrl: socialLinks.drumSession1,
+        published: true,
+      },
+      {
+        id: "reel-valence",
+        kind: "video",
+        title: L("Valence · Nothing beats Nature", "Valence · Rien ne vaut la nature"),
+        mediaUrl: isaacMedia.videos.valence1,
+        posterUrl: isaacMedia.images.valencePortrait,
+        externalUrl: socialLinks.instagram,
+        published: true,
+      },
+    ],
   },
   faq: {
     eyebrow: L("FAQ", "FAQ"),
@@ -248,10 +303,10 @@ export const defaultMusicWorks: MusicWorkContent[] = [
     kind: L("Single", "Single"),
     image: studioMedia.jazzStage,
     images: [
-      studioMedia.jazzStage,
-      studioMedia.mic,
-      studioMedia.nightCity,
-      studioMedia.vinyl,
+      isaacMedia.images.reborn1,
+      isaacMedia.images.reborn2,
+      isaacMedia.images.reborn3,
+      isaacMedia.images.reborn4,
     ],
     span: "lg:col-span-2 lg:row-span-2",
     year: "2025",
@@ -281,6 +336,10 @@ export const defaultMusicWorks: MusicWorkContent[] = [
       {
         label: "YouTube",
         url: "https://www.youtube.com/results?search_query=Midnight+Standards+Isaac+Odiana",
+      },
+      {
+        label: "Instagram",
+        url: socialLinks.instagram,
       },
     ],
     tracks: [
@@ -484,16 +543,16 @@ export const defaultAnnouncements: AnnouncementsBundle = {
     {
       id: "ann-midnight-standards",
       kind: "mixtape",
-      title: L("Midnight Standards mixtape", "Mixtape Midnight Standards"),
+      title: L("SHAKARA DON END — Upcoming EP", "SHAKARA DON END — Nouvel EP"),
       excerpt: L(
-        "A late-night selection of jazz phrasing and beat architecture.",
-        "Une sélection nocturne de phrasé jazz et d’architecture de beats.",
+        "New music from the upcoming EP — plus REBORN streaming now on all platforms.",
+        "Nouveaux titres de l’EP à venir — et REBORN déjà disponible sur toutes les plateformes.",
       ),
       body: L(
-        "The Midnight Standards mixtape is live — stream it from the music room and catch the visuals in the gallery.",
-        "La mixtape Midnight Standards est en ligne — écoutez-la dans le salon musique et retrouvez les visuels en galerie.",
+        "SHAKARA DON END is on the way to all streaming platforms, alongside the REBORN release with Blackmany Trio. Catch the drum sessions and clips in the studio room and on @isaac_odiana.",
+        "SHAKARA DON END arrive bientôt sur toutes les plateformes, aux côtés de REBORN avec le Blackmany Trio. Retrouvez les sessions batterie et extraits dans le studio et sur @isaac_odiana.",
       ),
-      image: studioMedia.vinyl,
+      image: isaacMedia.images.reborn4,
       href: "/music",
       published: true,
       pinned: true,
